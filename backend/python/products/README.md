@@ -45,6 +45,7 @@ POST `/api-2/products/`
   "quantity": 10
 }
 ```
+![Create](screenshots/create.png)
 
 ### Get All Products
 GET `/api-2/products/`
@@ -53,9 +54,12 @@ Pagination:
 ```
 /api-2/products/?page=1&page_size=5
 ```
+![List](screenshots/list.png)
 
 ### Get Single Product
 GET `/api-2/products/<id>/`
+
+![Single](screenshots/single.png)
 
 ### Update Product
 PATCH `/api-2/products/<id>/`
@@ -66,32 +70,13 @@ PATCH `/api-2/products/<id>/`
 }
 ```
 
+![Update](screenshots/update.png)
+
 ### Delete Product
 DELETE `/api-2/products/<id>/`
 
 ---
-
-## 📸 Postman Screenshots
-
-Create a folder named `screenshots/` and add:
-
-- create.png
-- list.png
-- single.png
-- update.png
-- delete.png
-- error.png
-
-Then include:
-
-![Create](screenshots/create.png)
-![List](screenshots/list.png)
-![Single](screenshots/single.png)
-![Update](screenshots/update.png)
 ![Delete](screenshots/delete.png)
-![Error](screenshots/error.png)
-
----
 
 ## 👨‍💻 Author
 Harsh Shekhawat  
