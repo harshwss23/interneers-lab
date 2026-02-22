@@ -25,7 +25,6 @@ class ProductCreateSerializer(serializers.Serializer):
 
 
 class ProductUpdateSerializer(serializers.Serializer):
-    # PATCH style: all optional
     name = serializers.CharField(max_length=120, required=False)
     description = serializers.CharField(allow_blank=True, required=False)
     category = serializers.CharField(max_length=80, required=False)
