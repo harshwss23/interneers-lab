@@ -78,6 +78,9 @@ DELETE `/api-2/products/<id>/`
 ---
 ![Delete](screenshots/delete.png) 
 
+### MongoDB Compass 
+![MongoDB](screenshots/MongoDB_ss.png)
+
 ## 👨‍💻 Author
 Harsh Shekhawat  
 Week 2 – Inventory Management System
