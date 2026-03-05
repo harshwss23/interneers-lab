@@ -11,6 +11,19 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import mongoengine
+import os
+
+MONGO_DB = os.getenv("MONGO_DB", "ims_db")
+MONGO_HOST = os.getenv("MONGO_HOST", "localhost")
+MONGO_PORT = int(os.getenv("MONGO_PORT", "27017"))
+
+mongoengine.connect(
+    db=MONGO_DB,
+    host=MONGO_HOST,
+    port=MONGO_PORT,
+    alias="default"  
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

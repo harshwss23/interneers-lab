@@ -76,7 +76,7 @@ PATCH `/api-2/products/<id>/`
 DELETE `/api-2/products/<id>/`
 
 ---
-![Delete](screenshots/delete.png)
+![Delete](screenshots/delete.png) 
 
 ## 👨‍💻 Author
 Harsh Shekhawat  
