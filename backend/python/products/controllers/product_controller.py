@@ -19,7 +19,16 @@ def _json_body(request):
 @csrf_exempt
 def products_collection(request):
     if request.method == "GET":
-        items = service.list_products()
+        filters = {}
+        category_ids = request.GET.getlist("category_id")
+        if category_ids:
+            filters["category_ids"] = category_ids
+        
+        brand = request.GET.get("brand")
+        if brand:
+            filters["brand"] = brand
+
+        items = service.list_products(filters if filters else None)
         return JsonResponse({"data": [i.model_dump() for i in items]})
 
     if request.method == "POST":
@@ -35,6 +44,41 @@ def products_collection(request):
 
     return HttpResponseNotAllowed(["GET", "POST"])
 
+
+@csrf_exempt
+def bulk_upload_products(request):
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+    
+    import csv
+    import io
+    
+    if "file" not in request.FILES:
+        return JsonResponse({"error": "No file provided"}, status=400)
+    
+    file = request.FILES["file"]
+    decoded_file = file.read().decode("utf-8")
+    io_string = io.StringIO(decoded_file)
+    reader = csv.DictReader(io_string)
+    
+    products_to_create = []
+    for row in reader:
+        try:
+            # Map CSV columns to Product properties
+            # Expecting: name, description, brand, category_id, price, quantity
+            products_to_create.append({
+                "name": row["name"],
+                "description": row.get("description", ""),
+                "brand": row.get("brand", "Unknown"),
+                "category_id": row.get("category_id"),
+                "price": float(row["price"]),
+                "quantity": int(row["quantity"])
+            })
+        except (KeyError, ValueError) as e:
+            return JsonResponse({"error": f"Invalid CSV format or data: {str(e)}"}, status=400)
+    
+    items = service.create_products_bulk(products_to_create)
+    return JsonResponse({"data": [i.model_dump() for i in items]}, status=201)
 
 @csrf_exempt
 def product_item(request, product_id: str):

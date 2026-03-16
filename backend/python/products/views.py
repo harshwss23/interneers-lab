@@ -37,6 +37,11 @@ class ProductListCreate(APIView):
     def get(self, request):
         items = list(PRODUCTS.values())
 
+        # Support category filtering (Week 4)
+        category_id = request.query_params.get("category_id")
+        if category_id:
+            items = [i for i in items if i.get("category") == category_id or str(i.get("category_id")) == category_id]
+
         # basic pagination (advanced)
         try:
             page = int(request.query_params.get("page", "1"))
