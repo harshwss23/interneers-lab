@@ -49,13 +49,18 @@ class TestProductService(unittest.TestCase):
             with self.assertRaisesRegex(ValidationError, "no such category exist"):
                 self.service.list_products(filters)
 
-    def test_create_product_negative_price(self):
-        with self.assertRaises(Exception): 
-            ProductCreateRequest(name="A", brand="B", price=-10.0, quantity=1)
+    def test_create_product_invalid_data(self):
+        # Parameterized validation testing using subTest
+        cases = [
+            ("negative_price", {"name": "A", "brand": "B", "price": -10.0, "quantity": 1}),
+            ("empty_name", {"name": "", "brand": "B", "price": 10.0, "quantity": 1}),
+            ("empty_brand", {"name": "A", "brand": "", "price": 10.0, "quantity": 1}),
+        ]
+        for name, data in cases:
+            with self.subTest(case=name):
+                with self.assertRaises(Exception): # Pydantic ValidationError
+                    ProductCreateRequest(**data)
 
-    def test_create_product_empty_name(self):
-        with self.assertRaises(Exception): 
-            ProductCreateRequest(name="", brand="B", price=10.0, quantity=1)
 
     def test_create_product_invalid_category(self):
         req = ProductCreateRequest(name="P", brand="B", price=10.0, quantity=1, category_id=str(ObjectId()))

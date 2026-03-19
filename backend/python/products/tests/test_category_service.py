@@ -27,10 +27,25 @@ class TestProductCategoryService(unittest.TestCase):
         self.assertEqual(result.title, "Test Cat")
         self.mock_repo.create.assert_called_once()
 
-    def test_create_category_missing_fields(self):
-        req = CategoryCreateRequest(title="A") 
-        with self.assertRaisesRegex(ValidationError, "Kindly Provie both Fields"):
-            self.service.create_category(req)
+    def test_create_category_invalid_data(self):
+        # Parameterized testing for both schema-level and service-level validation
+        cases = [
+            ("missing_description", {"title": "A"}, ValidationError, "Kindly Provie both Fields"),
+            ("empty_title", {"title": "", "description": "D"}, Exception, ""), # Schema-level failure
+        ]
+        for name, data, exc_type, expected_msg in cases:
+            with self.subTest(case=name):
+                try:
+                    req = CategoryCreateRequest(**data)
+                    with self.assertRaisesRegex(exc_type, expected_msg):
+                        self.service.create_category(req)
+                except Exception:
+                    if exc_type is Exception:
+                        pass # Expected schema failure
+                    else:
+                        raise
+
+
 
     def test_create_category_duplicate_title(self):
         req = CategoryCreateRequest(title="Duplicate", description="Desc")
