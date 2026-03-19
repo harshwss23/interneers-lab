@@ -25,7 +25,7 @@ python manage.py runserver
 
 Base URL:
 ```
-http://127.0.0.1:8000/api-2/
+http://127.0.0.1:8000/api/products/
 ```
 
 ---
@@ -33,7 +33,7 @@ http://127.0.0.1:8000/api-2/
 ## 📡 API Endpoints
 
 ### Create Product
-POST `/api-2/products/`
+POST `/api/products/`
 
 ```json
 {
@@ -52,17 +52,17 @@ GET `/api-2/products/`
 
 Pagination:
 ```
-/api-2/products/?page=1&page_size=5
+/api/products/?page=1&page_size=5
 ```
 ![List](screenshots/list.png)
 
 ### Get Single Product
-GET `/api-2/products/<id>/`
+GET `/api/products/<id>/`
 
 ![Single](screenshots/single.png)
 
 ### Update Product
-PATCH `/api-2/products/<id>/`
+PATCH `/api/products/<id>/`
 
 ```json
 {
@@ -73,7 +73,7 @@ PATCH `/api-2/products/<id>/`
 ![Update](screenshots/update.png)
 
 ### Delete Product
-DELETE `/api-2/products/<id>/`
+DELETE `/api/products/<id>/`
 
 ---
 ![Delete](screenshots/delete.png) 

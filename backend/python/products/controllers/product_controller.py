@@ -18,18 +18,39 @@ def _json_body(request):
 
 @csrf_exempt
 def products_collection(request):
+    if request.path.endswith("/ensure-categories/"):
+        if request.method == "POST":
+            count = service.ensure_all_products_have_category()
+            return JsonResponse({"message": f"Updated {count} products with General category"})
+        return HttpResponseNotAllowed(["POST"])
+
     if request.method == "GET":
         filters = {}
         category_ids = request.GET.getlist("category_id")
         if category_ids:
             filters["category_ids"] = category_ids
         
-        brand = request.GET.get("brand")
-        if brand:
-            filters["brand"] = brand
+        brands = request.GET.getlist("brand")
+        if brands:
+            filters["brands"] = brands
+        
+        min_price = request.GET.get("min_price")
+        if min_price:
+            filters["min_price"] = min_price
+        
+        max_price = request.GET.get("max_price")
+        if max_price:
+            filters["max_price"] = max_price
+            
+        search = request.GET.get("search")
+        if search:
+            filters["search"] = search
 
-        items = service.list_products(filters if filters else None)
-        return JsonResponse({"data": [i.model_dump() for i in items]})
+        try:
+            items = service.list_products(filters if filters else None)
+            return JsonResponse({"data": [i.model_dump() for i in items]})
+        except ValidationError as e:
+            return JsonResponse({"error": str(e)}, status=400)
 
     if request.method == "POST":
         body = _json_body(request)
@@ -41,6 +62,8 @@ def products_collection(request):
             return JsonResponse({"data": item.model_dump()}, status=201)
         except PydanticValidationError as e:
             return JsonResponse({"error": "Validation error", "details": e.errors()}, status=400)
+        except ValidationError as e:
+            return JsonResponse({"error": str(e)}, status=400)
 
     return HttpResponseNotAllowed(["GET", "POST"])
 
@@ -77,8 +100,11 @@ def bulk_upload_products(request):
         except (KeyError, ValueError) as e:
             return JsonResponse({"error": f"Invalid CSV format or data: {str(e)}"}, status=400)
     
-    items = service.create_products_bulk(products_to_create)
-    return JsonResponse({"data": [i.model_dump() for i in items]}, status=201)
+    result = service.create_products_bulk(products_to_create)
+    return JsonResponse({
+        "data": [i.model_dump() for i in result["created"]],
+        "errors": result["errors"]
+    }, status=201 if not result["errors"] else 207)
 
 @csrf_exempt
 def product_item(request, product_id: str):

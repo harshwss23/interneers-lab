@@ -9,6 +9,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('hello/', hello_world),
     path("api/", include("greet.adapters.in_http.urls")),
-    path("api-2/", include("products.urls")),
-    path("api-3/", include("products.urls"))
+    path("api/", include("products.urls")),
 ]

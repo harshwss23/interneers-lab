@@ -23,6 +23,9 @@ class ProductRepository:
         except DoesNotExist:
             return None
 
+    def get_by_precise_match(self, name: str, description: str, brand: str) -> Optional[ProductDocument]:
+        return ProductDocument.objects(name=name, description=description, brand=brand).first()
+
     def list_by_category(self, category_id: str) -> List[ProductDocument]:
         if not ObjectId.is_valid(category_id):
             return []
@@ -35,8 +38,21 @@ class ProductRepository:
             if valid_ids:
                 query["category_id__in"] = valid_ids
         
-        if "brand" in filters:
+        if "brands" in filters:
+            query["brand__in"] = filters["brands"]
+        elif "brand" in filters:
             query["brand"] = filters["brand"]
+
+        if "min_price" in filters:
+            query["price__gte"] = float(filters["min_price"])
+        if "max_price" in filters:
+            query["price__lte"] = float(filters["max_price"])
+            
+        if "search" in filters:
+            from mongoengine.queryset.visitor import Q
+            search_term = filters["search"]
+            search_query = Q(name__icontains=search_term) | Q(description__icontains=search_term) | Q(brand__icontains=search_term)
+            return list(ProductDocument.objects(search_query, **query).order_by("-created_at"))
             
         return list(ProductDocument.objects(**query).order_by("-created_at"))
 

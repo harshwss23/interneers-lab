@@ -35,12 +35,35 @@ def categories_collection(request):
             return JsonResponse({"data": item.model_dump()}, status=201)
         except PydanticValidationError as e:
             return JsonResponse({"error": "Validation error", "details": e.errors()}, status=400)
+        except ValidationError as e:
+            return JsonResponse({"error": str(e)}, status=400)
 
     return HttpResponseNotAllowed(["GET", "POST"])
 
 @csrf_exempt
-def category_item(request, category_id: str):
+def category_item(request, category_id: str, product_id: str = None):
+    if product_id:
+        if request.method == "POST":
+            try:
+                category_service.add_product_to_category(category_id, product_id)
+                return JsonResponse({"message": "Product added to category"})
+            except (NotFoundError, ValidationError) as e:
+                return JsonResponse({"error": str(e)}, status=404 if isinstance(e, NotFoundError) else 400)
+        
+        if request.method == "DELETE":
+            try:
+                category_service.remove_product_from_category(category_id, product_id)
+                return JsonResponse({"message": "Product removed from category"})
+            except (NotFoundError, ValidationError) as e:
+                return JsonResponse({"error": str(e)}, status=404 if isinstance(e, NotFoundError) else 400)
+        
+        return HttpResponseNotAllowed(["POST", "DELETE"])
+
     if request.method == "GET":
+        if request.path.endswith("/products/"):
+            products = product_service.list_products_by_category(category_id)
+            return JsonResponse({"data": [p.model_dump() for p in products]})
+        
         try:
             item = category_service.get_category(category_id)
             return JsonResponse({"data": item.model_dump()})

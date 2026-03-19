@@ -10,9 +10,12 @@ from products.controllers.product_controller import products_collection, product
 from products.controllers.category_controller import categories_collection, category_item
 
 urlpatterns = [
-    path("products", products_collection),
-    path("products/bulk", bulk_upload_products),
-    path("products/<str:product_id>", product_item),
-    path("categories", categories_collection),
-    path("categories/<str:category_id>", category_item),
+    path("products/", products_collection),
+    path("products/bulk/", bulk_upload_products),
+    path("products/ensure-categories/", products_collection), # We'll handle this in products_collection or a new one
+    path("products/<str:product_id>/", product_item),
+    path("categories/", categories_collection),
+    path("categories/<str:category_id>/", category_item),
+    path("categories/<str:category_id>/products/", category_item),
+    path("categories/<str:category_id>/products/<str:product_id>/", category_item),
 ]

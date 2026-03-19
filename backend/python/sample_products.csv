@@ -1,6 +1,2 @@
 name,description,brand,category_id,price,quantity
-Wireless Mouse,Ergonomic wireless mouse,Logitech,69b7eb99ed118aee68510c3d,25.99,50
-Mechanical Keyboard,RGB Backlit mechanical keyboard,Razer,69b7eb99ed118aee68510c3d,89.50,20
-Smart Watch,Waterproof fitness tracker,Fitbit,69b7eb99ed118aee68510c3d,149.99,15
-USB-C Hub,7-in-1 multi-port adapter,Anker,69b7eb99ed118aee68510c3d,35.00,30
-Bluetooth Speaker,Portable waterproof speaker,JBL,69b7eb99ed118aee68510c3d,55.00,25
+Wireless Mouse,Ergonomic wireless mouse,Logitech,69bb9d3485def58d6f399cd9,25.99,50

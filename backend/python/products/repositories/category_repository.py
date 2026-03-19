@@ -23,6 +23,9 @@ class ProductCategoryRepository:
         except DoesNotExist:
             return None
 
+    def get_by_title(self, title: str) -> Optional[ProductCategoryDocument]:
+        return ProductCategoryDocument.objects(title=title).first()
+
     def update(self, category_id: str, patch: dict) -> Optional[ProductCategoryDocument]:
         doc = self.get_by_id(category_id)
         if not doc:
