@@ -10,7 +10,14 @@ jobs:
   test-and-build:
     name: Test and Build
     runs-on: ubuntu-latest
-    
+
+    # Setup MongoDB as a service container for exactly what the tests need
+    services:
+      mongodb:
+        image: mongo:8.0
+        ports:
+          - 27017:27017
+
     # Define the working directory since your backend code is in a subfolder
     defaults:
       run:
@@ -28,7 +35,7 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements.txt pytest
           
       - name: Run Tests
         run: |
