@@ -21,8 +21,10 @@
     "jsx": "react-jsx",
     "baseUrl": "src",
     "types": [
-      "node"
-    ]
+      "node",
+      "vite/client"
+    ],
+    "useDefineForClassFields": true
   },
   "include": [
     "src"

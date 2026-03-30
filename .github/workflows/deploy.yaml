@@ -1,0 +1,77 @@
+name: Django CI/CD Pipeline
+
+# Trigger the workflow on pushes to the main branch
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test-and-build:
+    name: Test and Build
+    runs-on: ubuntu-latest
+    
+    # Define the working directory since your backend code is in a subfolder
+    defaults:
+      run:
+        working-directory: ./backend/python
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12' 
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          
+      - name: Run Tests
+        run: |
+          python manage.py test products
+          
+      - name: Log in to Docker Hub
+        # Only login and push if tests pass
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend/python
+          file: ./backend/python/DockerFile
+          push: true
+          # Replace 'yourdockerhubusername' and 'yourimagename'
+          tags: ${{ secrets.DOCKER_USERNAME }}/django-backend:latest
+
+  deploy:
+    name: Deploy to EC2
+    needs: test-and-build # Only run deploy if the test-and-build job succeeds
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          # The script that runs exactly on your EC2 terminal
+          script: |
+            # Navigate to the project folder on EC2
+            cd interneers-lab/backend/python
+            
+            # Pull the latest code (to get any updates to docker-compose.prod.yaml)
+            git pull origin main
+            
+            # Pull the latest Docker image from Docker Hub
+            docker pull ${{ secrets.DOCKER_USERNAME }}/django-backend:latest
+            
+            # Restart the Docker containers silently
+            docker compose -f docker-compose.prod.yaml up -d

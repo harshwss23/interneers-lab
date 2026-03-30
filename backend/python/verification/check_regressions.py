@@ -27,7 +27,7 @@ def main():
     all_passed = True
     
     # 1. Run Parametrized Test Suite using pytest
-    passed, output = run_command(["py", "-m", "pytest", "products/tests"], "Pytest Suite")
+    passed, output = run_command(["py", "manage.py", "test", "products"], "Django Test Suite")
     if not passed:
         all_passed = False
         print("-" * 40)
