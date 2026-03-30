@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 from bson import ObjectId
 from mongoengine.errors import DoesNotExist
@@ -7,8 +7,8 @@ from products.db.category_document import ProductCategoryDocument
 class ProductCategoryRepository:
     def create(self, data: dict) -> ProductCategoryDocument:
         doc = ProductCategoryDocument(**data)
-        doc.created_at = datetime.utcnow()
-        doc.updated_at = datetime.utcnow()
+        doc.created_at = datetime.now(timezone.utc)
+        doc.updated_at = datetime.now(timezone.utc)
         doc.save()
         return doc
 
@@ -34,7 +34,7 @@ class ProductCategoryRepository:
         for k, v in patch.items():
             setattr(doc, k, v)
 
-        doc.updated_at = datetime.utcnow()
+        doc.updated_at = datetime.now(timezone.utc)
         doc.save()
         return doc
 

@@ -31,7 +31,7 @@ class AuthService:
             "status": "ACTIVE",
             "is_verified": False,
             "otp_hash": hash_otp(otp),
-            "otp_expires_at": datetime.utcnow() + timedelta(minutes=otp_ttl),
+            "otp_expires_at": datetime.now(timezone.utc) + timedelta(minutes=otp_ttl),
             "otp_attempts": 0,
         })
 
@@ -57,7 +57,7 @@ class AuthService:
         if not user.otp_hash or not user.otp_expires_at:
             raise AuthError("OTP not generated. Please register again.")
 
-        if datetime.utcnow() > user.otp_expires_at:
+        if datetime.now(timezone.utc) > user.otp_expires_at:
             raise AuthError("OTP expired. Please register again.")
 
         user.otp_attempts = (user.otp_attempts or 0) + 1
@@ -93,7 +93,7 @@ class AuthService:
 
         ttl_hours = int(os.getenv("LOGIN_TOKEN_TTL_HOURS", "24"))
         token = str(uuid.uuid4())
-        expires_at = datetime.utcnow() + timedelta(hours=ttl_hours)
+        expires_at = datetime.now(timezone.utc) + timedelta(hours=ttl_hours)
 
         self.token_repo.create({
             "token": token,

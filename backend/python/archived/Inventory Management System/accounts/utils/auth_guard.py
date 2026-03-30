@@ -22,7 +22,7 @@ def require_auth(request) -> Tuple[Optional[UserDocument], Optional[JsonResponse
     if not token_doc:
         return None, JsonResponse({"error": "INVALID_TOKEN"}, status=401)
 
-    if datetime.utcnow() > token_doc.expires_at:
+    if datetime.now(timezone.utc) > token_doc.expires_at:
         return None, JsonResponse({"error": "TOKEN_EXPIRED"}, status=401)
 
     user = UserDocument.objects(id=token_doc.user_id).first()

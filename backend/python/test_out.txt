@@ -1,0 +1,181 @@
+Creating test database for alias 'default'...
+EE.EEEEE
+======================================================================
+ERROR: test_api_category_deletion_impact (products.tests.test_api_integration.TestAPIIntegration.test_api_category_deletion_impact)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\harsh\OneDrive\Desktop\interneers-lab\interneers-lab\backend\python\products\tests\test_api_integration.py", line 92, in test_api_category_deletion_impact
+    res = self.client.post("/api/categories/", data=json.dumps(cat_data), content_type="application/json")
+  File "C:\Users\harsh\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py", line 1153, in post
+    response = super().post(
+        path,
+    ...<5 lines>...
+        **extra,
+    )
+  File "C:\Users\harsh\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py", line 499, in post
+    return self.generic(
+           ~~~~~~~~~~~~^
+        "POST",
+        ^^^^^^^
+    ...<6 lines>...
+        **extra,
+        ^^^^^^^^
+    )
+    ^
+  File "C:\Users\harsh\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py", line 671, in generic
+    return self.request(**r)
+           ~~~~~~~~~~~~^^^^^
+  File "C:\Users\harsh\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py", line 1087, in request
+    self.check_exception(response)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\harsh\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py", line 802, in check_exception
+    raise exc_value
+  File "C:\Users\harsh\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\harsh\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\harsh\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\harsh\OneDrive\Desktop\interneers-lab\interneers-lab\backend\python\products\controllers\category_controller.py", line 34, in categories_collection
+    item = category_service.create_category(req)
+  File "C:\Users\harsh\OneDrive\Desktop\interneers-lab\interneers-lab\backend\python\products\services\category_service.py", line 30, in create_category
+    doc = self.repo.create(data)
+  File "C:\Users\harsh\OneDrive\Desktop\interneers-lab\interneers-lab\backend\python\products\repositories\category_repository.py", line 10, in create
+    doc.created_at = datetime.now(timezone.utc)
+                                  ^^^^^^^^
+NameError: name 'timezone' is not defined
+
+======================================================================
+ERROR: test_api_filtering_and_search (products.tests.test_api_integration.TestAPIIntegration.test_api_filtering_and_search)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\harsh\OneDrive\Desktop\interneers-lab\interneers-lab\backend\python\products\tests\test_api_integration.py", line 64, in test_api_filtering_and_search
+    cat_service.seed_categories()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\harsh\OneDrive\Desktop\interneers-lab\interneers-lab\backend\python\products\services\category_service.py", line 125, in seed_categories
+    self.repo.create(item)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\harsh\OneDrive\Desktop\interneers-lab\interneers-lab\backend\python\products\repositories\category_repository.py", line 10, in create
+    doc.created_at = datetime.now(timezone.utc)
+                                  ^^^^^^^^
+NameError: name 'timezone' is not defined
+
+======================================================================
+ERROR: test_end_to_end_product_flow (products.tests.test_api_integration.TestAPIIntegration.test_end_to_end_product_flow)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\harsh\OneDrive\Desktop\interneers-lab\interneers-lab\backend\python\products\tests\test_api_integration.py", line 32, in test_end_to_end_product_flow
+    res = self.client.post("/api/categories/", data=json.dumps(cat_data), content_type="application/json")
+  File "C:\Users\harsh\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py", line 1153, in post
+    response = super().post(
+        path,
+    ...<5 lines>...
+        **extra,
+    )
+  File "C:\Users\harsh\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py", line 499, in post
+    return self.generic(
+           ~~~~~~~~~~~~^
+        "POST",
+        ^^^^^^^
+    ...<6 lines>...
+        **extra,
+        ^^^^^^^^
+    )
+    ^
+  File "C:\Users\harsh\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py", line 671, in generic
+    return self.request(**r)
+           ~~~~~~~~~~~~^^^^^
+  File "C:\Users\harsh\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py", line 1087, in request
+    self.check_exception(response)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\harsh\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\test\client.py", line 802, in check_exception
+    raise exc_value
+  File "C:\Users\harsh\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\harsh\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\harsh\AppData\Local\Programs\Python\Python314\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\harsh\OneDrive\Desktop\interneers-lab\interneers-lab\backend\python\products\controllers\category_controller.py", line 34, in categories_collection
+    item = category_service.create_category(req)
+  File "C:\Users\harsh\OneDrive\Desktop\interneers-lab\interneers-lab\backend\python\products\services\category_service.py", line 30, in create_category
+    doc = self.repo.create(data)
+  File "C:\Users\harsh\OneDrive\Desktop\interneers-lab\interneers-lab\backend\python\products\repositories\category_repository.py", line 10, in create
+    doc.created_at = datetime.now(timezone.utc)
+                                  ^^^^^^^^
+NameError: name 'timezone' is not defined
+
+======================================================================
+ERROR: test_category_deletion_reassignment_integration (products.tests.test_product_integration.TestProductIntegration.test_category_deletion_reassignment_integration)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\harsh\OneDrive\Desktop\interneers-lab\interneers-lab\backend\python\products\tests\test_product_integration.py", line 56, in test_category_deletion_reassignment_integration
+    self.seed_data()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\harsh\OneDrive\Desktop\interneers-lab\interneers-lab\backend\python\products\tests\integration_base.py", line 30, in seed_data
+    self.cat_service.seed_categories()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\harsh\OneDrive\Desktop\interneers-lab\interneers-lab\backend\python\products\services\category_service.py", line 125, in seed_categories
+    self.repo.create(item)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\harsh\OneDrive\Desktop\interneers-lab\interneers-lab\backend\python\products\repositories\category_repository.py", line 10, in create
+    doc.created_at = datetime.now(timezone.utc)
+                                  ^^^^^^^^
+NameError: name 'timezone' is not defined
+
+======================================================================
+ERROR: test_create_product_and_verify_persistence (products.tests.test_product_integration.TestProductIntegration.test_create_product_and_verify_persistence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\harsh\OneDrive\Desktop\interneers-lab\interneers-lab\backend\python\products\tests\test_product_integration.py", line 9, in test_create_product_and_verify_persistence
+    cat_res = self.cat_service.create_category(cat_req)
+  File "C:\Users\harsh\OneDrive\Desktop\interneers-lab\interneers-lab\backend\python\products\services\category_service.py", line 30, in create_category
+    doc = self.repo.create(data)
+  File "C:\Users\harsh\OneDrive\Desktop\interneers-lab\interneers-lab\backend\python\products\repositories\category_repository.py", line 10, in create
+    doc.created_at = datetime.now(timezone.utc)
+                                  ^^^^^^^^
+NameError: name 'timezone' is not defined
+
+======================================================================
+ERROR: test_rich_filtering_integration (products.tests.test_product_integration.TestProductIntegration.test_rich_filtering_integration)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\harsh\OneDrive\Desktop\interneers-lab\interneers-lab\backend\python\products\tests\test_product_integration.py", line 32, in test_rich_filtering_integration
+    self.seed_data()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\harsh\OneDrive\Desktop\interneers-lab\interneers-lab\backend\python\products\tests\integration_base.py", line 30, in seed_data
+    self.cat_service.seed_categories()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\harsh\OneDrive\Desktop\interneers-lab\interneers-lab\backend\python\products\services\category_service.py", line 125, in seed_categories
+    self.repo.create(item)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\harsh\OneDrive\Desktop\interneers-lab\interneers-lab\backend\python\products\repositories\category_repository.py", line 10, in create
+    doc.created_at = datetime.now(timezone.utc)
+                                  ^^^^^^^^
+NameError: name 'timezone' is not defined
+
+======================================================================
+ERROR: test_search_by_brand_integration (products.tests.test_product_integration.TestProductIntegration.test_search_by_brand_integration)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\harsh\OneDrive\Desktop\interneers-lab\interneers-lab\backend\python\products\tests\test_product_integration.py", line 45, in test_search_by_brand_integration
+    self.seed_data()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\harsh\OneDrive\Desktop\interneers-lab\interneers-lab\backend\python\products\tests\integration_base.py", line 30, in seed_data
+    self.cat_service.seed_categories()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\harsh\OneDrive\Desktop\interneers-lab\interneers-lab\backend\python\products\services\category_service.py", line 125, in seed_categories
+    self.repo.create(item)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\harsh\OneDrive\Desktop\interneers-lab\interneers-lab\backend\python\products\repositories\category_repository.py", line 10, in create
+    doc.created_at = datetime.now(timezone.utc)
+                                  ^^^^^^^^
+NameError: name 'timezone' is not defined
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.180s
+
+FAILED (errors=7)
+Destroying test database for alias 'default'...
+Found 8 test(s).
+System check identified no issues (0 silenced).

@@ -1,0 +1,28 @@
+services:
+  web:
+    # Remove the 'build' section and use the 'image' instead
+    image: harshwss453/django-backend:latest
+    container_name: django_backend
+    restart: always
+    ports:
+      - "80:8000"
+    env_file:
+      - .env
+    depends_on:
+      - mongodb
+
+
+  mongodb:
+    image: mongo:8.0
+    container_name: interneers_lab_2026_mongodb
+    restart: always
+    ports:
+      - '27019:27017' # Only expose this if you need external access, otherwise remove 'ports' for security
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-root}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-example}
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:

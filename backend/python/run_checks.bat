@@ -4,7 +4,7 @@ echo ========================================
 echo   IMS PROJECT - REGRESSION CHECKER
 echo ========================================
 echo.
-py check_regressions.py
+py verification/check_regressions.py
 if %ERRORLEVEL% EQU 0 (
     color 0A
     echo.

@@ -1,2 +1,8 @@
 Django==6.0.2
+mongoengine==0.29.1
 pymongo==4.16.0
+pydantic==2.12.5
+python-dotenv==1.2.2
+requests==2.32.5
+djangorestframework==3.16.1
+django-cors-headers==4.7.0

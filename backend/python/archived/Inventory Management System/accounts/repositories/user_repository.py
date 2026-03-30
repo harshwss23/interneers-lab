@@ -8,11 +8,11 @@ class UserRepository:
 
     def create(self, data: dict) -> UserDocument:
         doc = UserDocument(**data)
-        doc.updated_at = datetime.utcnow()
+        doc.updated_at = datetime.now(timezone.utc)
         doc.save()
         return doc
 
     def save(self, user: UserDocument) -> UserDocument:
-        user.updated_at = datetime.utcnow()
+        user.updated_at = datetime.now(timezone.utc)
         user.save()
         return user
