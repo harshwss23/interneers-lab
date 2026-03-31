@@ -1,6 +1,5 @@
 name: Django CI/CD Pipeline
 
-# Trigger the workflow on pushes to the main branch
 on:
   push:
     branches:
@@ -11,14 +10,12 @@ jobs:
     name: Test and Build
     runs-on: ubuntu-latest
 
-    # Setup MongoDB as a service container for exactly what the tests need
     services:
       mongodb:
         image: mongo:8.0
         ports:
           - 27017:27017
 
-    # Define the working directory since your backend code is in a subfolder
     defaults:
       run:
         working-directory: ./backend/python
@@ -42,7 +39,6 @@ jobs:
           python manage.py test products
           
       - name: Log in to Docker Hub
-        # Only login and push if tests pass
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
@@ -54,12 +50,11 @@ jobs:
           context: ./backend/python
           file: ./backend/python/DockerFile
           push: true
-          # Replace 'yourdockerhubusername' and 'yourimagename'
           tags: ${{ secrets.DOCKER_USERNAME }}/django-backend:latest
 
   deploy:
     name: Deploy to EC2
-    needs: test-and-build # Only run deploy if the test-and-build job succeeds
+    needs: test-and-build 
     runs-on: ubuntu-latest
 
     steps:
@@ -69,7 +64,6 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          # The script that runs exactly on your EC2 terminal
           script: |
             # Navigate to the project folder on EC2
             cd interneers-lab/backend/python

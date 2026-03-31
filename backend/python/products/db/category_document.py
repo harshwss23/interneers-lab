@@ -2,7 +2,7 @@ from datetime import datetime
 from mongoengine import Document, StringField, DateTimeField
 
 class ProductCategoryDocument(Document):
-    meta = {"collection": "product_categories"}
+    meta = {"collection": "product_categories", "db_alias": "mongodb"}
 
     title = StringField(required=True, unique=True)
     description = StringField(default="")

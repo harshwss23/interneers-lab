@@ -8,14 +8,21 @@ from products.repositories.product_repository import ProductRepository
 from products.services.product_service import ProductService, NotFoundError, ValidationError
 from products.schemas.product_schemas import ProductCreateRequest, ProductUpdateRequest
 
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated, AllowAny
+
 service = ProductService(ProductRepository())
 
 def _json_body(request):
+    if hasattr(request, "data"):
+        return request.data
     try:
         return json.loads(request.body.decode("utf-8") or "{}")
     except Exception:
         return None
 
+@api_view(["GET", "POST"])
+@permission_classes([IsAuthenticated])
 @csrf_exempt
 def products_collection(request):
     if request.path.endswith("/ensure-categories/"):
@@ -42,6 +49,10 @@ def products_collection(request):
         if max_price:
             filters["max_price"] = max_price
             
+        created_by = request.GET.get("created_by")
+        if created_by:
+            filters["created_by"] = created_by
+
         search = request.GET.get("search")
         if search:
             filters["search"] = search
@@ -58,6 +69,8 @@ def products_collection(request):
             return JsonResponse({"error": "Invalid JSON"}, status=400)
         try:
             req = ProductCreateRequest(**body)
+            # Automatically set created_by from authenticated user
+            req.created_by = request.user.username
             item = service.create_product(req)
             return JsonResponse({"data": item.model_dump()}, status=201)
         except PydanticValidationError as e:
@@ -68,6 +81,8 @@ def products_collection(request):
     return HttpResponseNotAllowed(["GET", "POST"])
 
 
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
 @csrf_exempt
 def bulk_upload_products(request):
     if request.method != "POST":
@@ -95,7 +110,8 @@ def bulk_upload_products(request):
                 "brand": row.get("brand", "Unknown"),
                 "category_id": row.get("category_id"),
                 "price": float(row["price"]),
-                "quantity": int(row["quantity"])
+                "quantity": int(row["quantity"]),
+                "created_by": request.user.username
             })
         except (KeyError, ValueError) as e:
             return JsonResponse({"error": f"Invalid CSV format or data: {str(e)}"}, status=400)
@@ -106,35 +122,53 @@ def bulk_upload_products(request):
         "errors": result["errors"]
     }, status=201 if not result["errors"] else 207)
 
+@api_view(["GET", "PATCH", "PUT", "DELETE"])
+@permission_classes([IsAuthenticated])
 @csrf_exempt
 def product_item(request, product_id: str):
-    if request.method == "GET":
+    try:
         try:
             item = service.get_product(product_id)
+        except NotFoundError as e:
+            return JsonResponse({"error": str(e)}, status=404)
+
+        # Ownership / Admin Check
+        is_owner = item.created_by == request.user.username
+        is_admin = getattr(request.user, "role", "") == "ADMIN"
+
+        if request.method == "GET":
             return JsonResponse({"data": item.model_dump()})
-        except NotFoundError as e:
-            return JsonResponse({"error": str(e)}, status=404)
 
-    if request.method in ["PATCH", "PUT"]:
-        body = _json_body(request)
-        if body is None:
-            return JsonResponse({"error": "Invalid JSON"}, status=400)
-        try:
-            req = ProductUpdateRequest(**body)
-            item = service.update_product(product_id, req)
-            return JsonResponse({"data": item.model_dump()})
-        except PydanticValidationError as e:
-            return JsonResponse({"error": "Validation error", "details": e.errors()}, status=400)
-        except ValidationError as e:
-            return JsonResponse({"error": str(e)}, status=400)
-        except NotFoundError as e:
-            return JsonResponse({"error": str(e)}, status=404)
+        # Multi-level restriction: Only poster or Admin can Edit/Delete
+        if not is_owner and not is_admin:
+            return JsonResponse({
+                "error": "Access Denied: Only the manager who posted this product or an Administrator can modify it."
+            }, status=403)
 
-    if request.method == "DELETE":
-        try:
-            service.delete_product(product_id)
-            return JsonResponse({"message": "Deleted"})
-        except NotFoundError as e:
-            return JsonResponse({"error": str(e)}, status=404)
+        if request.method in ["PATCH", "PUT"]:
+            body = _json_body(request)
+            if body is None:
+                return JsonResponse({"error": "Invalid JSON"}, status=400)
+            try:
+                req = ProductUpdateRequest(**body)
+                updated_item = service.update_product(product_id, req)
+                return JsonResponse({"data": updated_item.model_dump()})
+            except PydanticValidationError as e:
+                return JsonResponse({"error": str(e), "details": e.errors()}, status=400)
+            except ValidationError as e:
+                return JsonResponse({"error": str(e)}, status=400)
+            except NotFoundError as e:
+                return JsonResponse({"error": str(e)}, status=404)
 
-    return HttpResponseNotAllowed(["GET", "PATCH", "PUT", "DELETE"])
+        if request.method == "DELETE":
+            try:
+                service.delete_product(product_id)
+                return JsonResponse({"message": "Deleted"})
+            except NotFoundError as e:
+                return JsonResponse({"error": str(e)}, status=404)
+
+        return HttpResponseNotAllowed(["GET", "PATCH", "PUT", "DELETE"])
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        return JsonResponse({"error": f"Internal Server Error: {str(e)}"}, status=500)

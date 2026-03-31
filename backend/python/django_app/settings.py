@@ -18,21 +18,20 @@ MONGO_DB = os.getenv("MONGO_DB", "ims_db")
 MONGO_HOST = os.getenv("MONGO_HOST", "localhost")
 MONGO_PORT = int(os.getenv("MONGO_PORT", "27017"))
 
-mongoengine.connect(
-    db=MONGO_DB,
-    host=MONGO_HOST,
-    port=MONGO_PORT,
-    alias="default"  
-)
+import sys
+if 'migrate' not in sys.argv and 'makemigrations' not in sys.argv:
+    mongoengine.connect(
+        db=MONGO_DB,
+        host=MONGO_HOST,
+        port=MONGO_PORT,
+        alias="mongodb"
+    )
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "setup key")
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -53,6 +52,10 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "corsheaders",
+    "rest_framework",
+    "rest_framework.authtoken",
+    "accounts",
+    "warehouses",
     "greet",
     "products",
 ]
@@ -140,3 +143,15 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/6.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+AUTH_USER_MODEL = 'accounts.User'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}

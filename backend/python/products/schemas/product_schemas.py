@@ -8,6 +8,7 @@ class ProductCreateRequest(BaseModel):
     category_id: Optional[str] = None
     price: float = Field(ge=0)
     quantity: int = Field(ge=0)
+    created_by: Optional[str] = None
 
 class ProductUpdateRequest(BaseModel):
     name: Optional[str] = Field(default=None, min_length=1)
@@ -25,7 +26,9 @@ class ProductResponse(BaseModel):
     description: str
     brand: str
     category_id: Optional[str]
+    category_name: Optional[str] = ""
     price: float
     quantity: int
+    created_by: Optional[str] = ""
     created_at: str
     updated_at: str

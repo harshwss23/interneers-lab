@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 from products.services.product_service import ProductService, ValidationError, NotFoundError
 from products.schemas.product_schemas import ProductCreateRequest
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, timezone
 
 @pytest.fixture
 def mock_repo():
@@ -33,8 +33,10 @@ class TestProductService:
         mock_doc.description = description
         mock_doc.brand = brand
         mock_doc.category_id = MagicMock(id=mock_gen_cat.return_value)
+        mock_doc.category_id.title = "General"
         mock_doc.price = price
         mock_doc.quantity = quantity
+        mock_doc.created_by = "testuser"
         mock_doc.created_at = datetime.now(timezone.utc)
         mock_doc.updated_at = datetime.now(timezone.utc)
         mock_repo.create.return_value = mock_doc

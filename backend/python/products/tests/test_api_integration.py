@@ -6,16 +6,15 @@ from products.tests.integration_base import IntegrationBase
 class TestAPIIntegration(TestCase, IntegrationBase):
     @classmethod
     def setUpClass(cls):
+        super().setUpClass()
         # Ensure we use the test database
         mongoengine.disconnect(alias='default')
         mongoengine.connect('test_ims_db', host='localhost', port=27017, alias='default')
-        # We don't call super().setUpClass() here if we want to avoid SQL transaction issues, 
-        # but Django 6.0 might require it for some Client features. 
-        # Actually, TestCase calls it for us if we use inheritance.
 
     @classmethod
     def tearDownClass(cls):
         mongoengine.disconnect(alias='default')
+        super().tearDownClass()
 
     def setUp(self):
         # Clean Mongo
@@ -24,7 +23,14 @@ class TestAPIIntegration(TestCase, IntegrationBase):
         ProductDocument.objects.delete()
         ProductCategoryDocument.objects.delete()
         
-        self.client = Client()
+        from rest_framework.test import APIClient
+        from rest_framework.authtoken.models import Token
+        from accounts.models import User
+        
+        self.user = User.objects.create_user(username='testuser', password='password123')
+        self.token = Token.objects.create(user=self.user)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
 
     def test_end_to_end_product_flow(self):
         # 1. Create a category via API

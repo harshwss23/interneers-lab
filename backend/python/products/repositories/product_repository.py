@@ -37,6 +37,9 @@ class ProductRepository:
             valid_ids = [ObjectId(fid) for fid in filters["category_ids"] if ObjectId.is_valid(fid)]
             if valid_ids:
                 query["category_id__in"] = valid_ids
+        elif "category_id" in filters and filters["category_id"]:
+            if ObjectId.is_valid(filters["category_id"]):
+                query["category_id"] = ObjectId(filters["category_id"])
         
         if "brands" in filters:
             query["brand__in"] = filters["brands"]
@@ -48,6 +51,9 @@ class ProductRepository:
         if "max_price" in filters:
             query["price__lte"] = float(filters["max_price"])
             
+        if "created_by" in filters:
+            query["created_by"] = filters["created_by"]
+
         if "search" in filters:
             from mongoengine.queryset.visitor import Q
             search_term = filters["search"]

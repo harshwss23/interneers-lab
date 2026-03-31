@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 from products.services.category_service import ProductCategoryService, ValidationError, NotFoundError
 from products.schemas.category_schemas import CategoryCreateRequest, CategoryUpdateRequest
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, timezone
 
 @pytest.fixture
 def mock_repo():

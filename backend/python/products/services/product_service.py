@@ -196,14 +196,29 @@ class ProductService:
             raise NotFoundError("Product not found")
 
     def _to_response(self, doc) -> ProductResponse:
+        from bson import ObjectId
+        
+        cat_id = None
+        cat_name = "Uncategorized"
+        
+        if doc.category_id:
+            if isinstance(doc.category_id, ObjectId):
+                cat_id = str(doc.category_id)
+            else:
+                # It's a document reference
+                cat_id = str(doc.category_id.id)
+                cat_name = getattr(doc.category_id, "title", "Uncategorized")
+
         return ProductResponse(
             id=str(doc.id),
             name=doc.name,
             description=doc.description or "",
             brand=doc.brand,
-            category_id=str(doc.category_id.id) if doc.category_id else None,
+            category_id=cat_id,
+            category_name=cat_name,
             price=float(doc.price),
             quantity=int(doc.quantity),
+            created_by=getattr(doc, "created_by", ""),
             created_at=doc.created_at.isoformat(),
             updated_at=doc.updated_at.isoformat(),
         )

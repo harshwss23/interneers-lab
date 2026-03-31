@@ -8,6 +8,8 @@ def hello_world(request):
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('hello/', hello_world),
+    path("api/accounts/", include("accounts.urls")),
+    path("api/warehouses/", include("warehouses.urls")),
     path("api/", include("greet.adapters.in_http.urls")),
     path("api/", include("products.urls")),
 ]

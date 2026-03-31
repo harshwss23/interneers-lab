@@ -11,7 +11,7 @@ from products.controllers.category_controller import categories_collection, cate
 
 urlpatterns = [
     path("products/", products_collection),
-    path("products/bulk/", bulk_upload_products),
+    path("products/bulk-upload/", bulk_upload_products),
     path("products/ensure-categories/", products_collection), # We'll handle this in products_collection or a new one
     path("products/<str:product_id>/", product_item),
     path("categories/", categories_collection),
