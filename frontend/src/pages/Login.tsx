@@ -15,7 +15,7 @@ export default function Login() {
         setLoading(true);
         setError('');
         try {
-            const res = await fetch('http://localhost:8000/api/accounts/login/', {
+            const res = await fetch('/api/accounts/login/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password }),

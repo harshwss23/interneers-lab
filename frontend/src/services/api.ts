@@ -1,6 +1,6 @@
 import { Product } from "../types/product";
 
-const BASE_URL = "http://localhost:8000/api";
+const BASE_URL = "/api";
 
 const getHeaders = () => {
     const token = localStorage.getItem('token');
