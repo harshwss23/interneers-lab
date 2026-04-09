@@ -12,7 +12,9 @@ class User(AbstractUser):
         ('INACTIVE', 'Inactive'),
     )
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='USER')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ACTIVE')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='INACTIVE')
+    otp = models.CharField(max_length=6, blank=True, null=True)
+    is_verified = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.username} ({self.role})"

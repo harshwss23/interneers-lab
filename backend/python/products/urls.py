@@ -1,10 +1,3 @@
-# from django.urls import path
-# from .views import ProductListCreate, ProductDetail
-
-# urlpatterns = [
-#     path("products/", ProductListCreate.as_view()),
-# ]
-
 from django.urls import path
 from products.controllers.product_controller import products_collection, product_item, bulk_upload_products
 from products.controllers.category_controller import categories_collection, category_item
@@ -12,7 +5,7 @@ from products.controllers.category_controller import categories_collection, cate
 urlpatterns = [
     path("products/", products_collection),
     path("products/bulk-upload/", bulk_upload_products),
-    path("products/ensure-categories/", products_collection), # We'll handle this in products_collection or a new one
+    path("products/ensure-categories/", products_collection),
     path("products/<str:product_id>/", product_item),
     path("categories/", categories_collection),
     path("categories/<str:category_id>/", category_item),

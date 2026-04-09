@@ -1,0 +1,16 @@
+node_modules
+build
+dist
+.env
+.gitignore
+Dockerfile.dev
+README.md
+playwright.config.ts
+e2e/
+integration-tests/
+playwright-report/
+test-results/
+tests-examples/
+.eslintrc.js
+yarn.lock
+package-lock.json

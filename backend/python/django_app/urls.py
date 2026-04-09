@@ -12,4 +12,5 @@ urlpatterns = [
     path("api/warehouses/", include("warehouses.urls")),
     path("api/", include("greet.adapters.in_http.urls")),
     path("api/", include("products.urls")),
+    path("api/orders/", include("orders.urls")),
 ]

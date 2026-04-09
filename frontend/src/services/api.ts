@@ -149,3 +149,125 @@ export const adjustStock = async (warehouseId: string, productId: string, quanti
     if (!res.ok) throw new Error(json.error || 'Failed to adjust stock');
     return json.data;
 };
+
+// Order APIs
+export interface Order {
+    id: string;
+    product: string;
+    product_name: string;
+    user: number;
+    username: string;
+    quantity: number;
+    address: string;
+    payment_details: string;
+    status: 'PENDING' | 'APPROVED' | 'REJECTED';
+    created_at: string;
+}
+
+export const getOrders = async (): Promise<Order[]> => {
+    const res = await fetch(`${BASE_URL}/orders/`, { headers: getHeaders() });
+    const json = await res.json();
+    return Array.isArray(json) ? json : (json.results || []);
+};
+
+export const createOrder = async (orderData: { product: string, quantity: number, address: string, payment_details: string }) => {
+    const res = await fetch(`${BASE_URL}/orders/`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(orderData)
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.detail || 'Failed to place order');
+    return json;
+};
+
+export const approveOrder = async (orderId: string) => {
+    const res = await fetch(`${BASE_URL}/orders/${orderId}/approve/`, {
+        method: 'PATCH',
+        headers: getHeaders(),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.detail || 'Failed to approve order');
+    return json;
+};
+
+// Cart APIs
+export interface CartItem {
+    product_id: string;
+    product_name: string;
+    price: number;
+    quantity: number;
+    available_quantity: number;
+}
+
+export const getCart = async (): Promise<{ items: CartItem[] }> => {
+    const res = await fetch(`${BASE_URL}/orders/cart/`, { headers: getHeaders() });
+    const json = await res.json();
+    return json;
+};
+
+export const addToCart = async (productId: string, quantity: number = 1) => {
+    const res = await fetch(`${BASE_URL}/orders/cart/`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({ product_id: productId, quantity })
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.detail || 'Failed to add to cart');
+    return json;
+};
+
+export const updateCartQuantity = async (productId: string, quantity: number) => {
+    const res = await fetch(`${BASE_URL}/orders/cart/`, {
+        method: 'PATCH',
+        headers: getHeaders(),
+        body: JSON.stringify({ product_id: productId, quantity })
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.detail || 'Failed to update cart');
+    return json;
+};
+
+export const clearCart = async () => {
+    const res = await fetch(`${BASE_URL}/orders/cart/`, {
+        method: 'DELETE',
+        headers: getHeaders()
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.detail || 'Failed to clear cart');
+    return json;
+};
+
+export const getAnalyticsData = async (warehouseId?: string) => {
+    let url = `${BASE_URL}/orders/analytics/`;
+    if (warehouseId) url += `?warehouse_id=${warehouseId}`;
+    const res = await fetch(url, { headers: getHeaders() });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.detail || 'Failed to fetch analytics');
+    return json;
+};
+
+export const getReportingData = async (type: string, params: any = {}, warehouseId?: string) => {
+    const searchParams = new URLSearchParams(params);
+    if (warehouseId) searchParams.append('warehouse_id', warehouseId);
+    const query = searchParams.toString();
+    const res = await fetch(`${BASE_URL}/orders/reports/?type=${type}&${query}`, { headers: getHeaders() });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.detail || 'Failed to fetch report');
+    return json;
+};
+
+export const exportReportCSV = async (type: string, warehouseId?: string) => {
+    let url = `${BASE_URL}/orders/reports/export/?type=${type}`;
+    if (warehouseId) url += `&warehouse_id=${warehouseId}`;
+    const res = await fetch(url, { headers: getHeaders() });
+    if (!res.ok) throw new Error('Failed to export CSV');
+    const blob = await res.blob();
+    const blobUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = `report_${type}_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(blobUrl);
+};

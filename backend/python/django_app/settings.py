@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 import mongoengine
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 MONGO_DB = os.getenv("MONGO_DB", "ims_db")
 MONGO_HOST = os.getenv("MONGO_HOST", "localhost")
@@ -21,6 +25,13 @@ MONGO_PORT = int(os.getenv("MONGO_PORT", "27017"))
 import sys
 if 'migrate' not in sys.argv and 'makemigrations' not in sys.argv:
     mongoengine.connect(
+        db=MONGO_DB,
+        host=MONGO_HOST,
+        port=MONGO_PORT,
+        alias="mongodb"
+    )
+elif 'runserver' in sys.argv:
+     mongoengine.connect(
         db=MONGO_DB,
         host=MONGO_HOST,
         port=MONGO_PORT,
@@ -58,6 +69,7 @@ INSTALLED_APPS = [
     "warehouses",
     "greet",
     "products",
+    "orders",
 ]
 
 MIDDLEWARE = [
@@ -138,6 +150,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+
+# Email Settings (SMTP)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/6.0/ref/settings/#default-auto-field
