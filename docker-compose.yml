@@ -15,7 +15,7 @@ services:
     container_name: django_backend
     restart: always
     env_file:
-      - ./backend/python/.env
+      - .env
     depends_on:
       - mongodb
     environment:
