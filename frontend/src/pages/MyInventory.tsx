@@ -80,22 +80,32 @@ const MyInventory: React.FC = () => {
     }
 
     return (
-        <div style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
+        <div className="page-container">
+            <style>{`
+                @media (max-width: 768px) {
+                    .inventory-header { flex-direction: column !important; align-items: stretch !important; gap: 1.5rem !important; }
+                    .inventory-header-actions { flex-direction: row !important; }
+                    .inventory-header-actions button { flex: 1; padding: 0.75rem !important; font-size: 0.8rem !important; gap: 0.25rem !important; }
+                    .filter-bar { flex-direction: column !important; }
+                }
+            `}</style>
+
+            <div className="inventory-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
                 <div>
-                    <h1 style={{ fontSize: "2rem", fontWeight: 900, color: "var(--text-main)", margin: 0 }}>My Inventory</h1>
-                    <p style={{ color: "var(--text-muted)", marginTop: "0.5rem" }}>Manage products you have posted.</p>
+                    <h1 style={{ fontSize: "2rem", fontWeight: 950, color: "var(--text-main)", margin: 0 }}>My Inventory</h1>
+                    <p style={{ color: "var(--text-muted)", marginTop: "0.5rem", fontSize: "0.95rem" }}>Manage products you have posted.</p>
                 </div>
-                <div style={{ display: "flex", gap: "1rem" }}>
+                <div className="inventory-header-actions" style={{ display: "flex", gap: "1rem" }}>
                     <button 
                         onClick={() => setIsBulkModalOpen(true)}
                         className="btn-primary"
                         style={{ 
                             backgroundColor: "white", 
-                            border: "2px solid var(--primary)", 
-                            color: "var(--primary)", 
-                            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-                            background: "none"
+                            border: "1px solid var(--glass-border)", 
+                            color: "var(--text-main)", 
+                            boxShadow: "none",
+                            background: "white",
+                            fontWeight: 700
                         }}
                     >
                         Bulk Upload
@@ -111,24 +121,24 @@ const MyInventory: React.FC = () => {
             </div>
 
             {/* Filters */}
-            <div className="premium-card" style={{ padding: "1.5rem", marginBottom: "2rem", display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-                <div style={{ position: "relative", flex: 1, minWidth: "200px" }}>
+            <div className="premium-card filter-bar" style={{ padding: "1.25rem", marginBottom: "2rem", display: "flex", gap: "1rem" }}>
+                <div style={{ position: "relative", flex: 2, minWidth: "200px" }}>
                     <Search style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} size={16} />
                     <input 
                         className="glass-input"
                         placeholder="Search products..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        style={{ width: "100%", paddingLeft: "40px", backgroundColor: "white" }}
+                        style={{ width: "100%", paddingLeft: "40px", backgroundColor: "#f8fafc" }}
                     />
                 </div>
-                <div style={{ position: "relative", minWidth: "200px" }}>
+                <div style={{ position: "relative", flex: 1, minWidth: "200px" }}>
                     <Filter style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} size={16} />
                     <select 
                         className="glass-input"
                         value={selectedCategory}
                         onChange={(e) => setSelectedCategory(e.target.value)}
-                        style={{ width: "100%", paddingLeft: "40px", appearance: "none", backgroundColor: "white" }}
+                        style={{ width: "100%", paddingLeft: "40px", appearance: "none", backgroundColor: "#f8fafc" }}
                     >
                         <option value="">All Categories</option>
                         {categories.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}

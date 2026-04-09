@@ -36,16 +36,27 @@ export default function Register() {
     };
 
     return (
-        <div style={{ 
+        <div className="auth-container" style={{ 
             width: '100%', 
-            height: '100vh', 
+            minHeight: '100vh', 
             display: 'flex', 
             flexDirection: 'row',
             backgroundColor: 'var(--bg-dark)',
-            overflow: 'hidden'
+            overflowX: 'hidden'
         }}>
+            <style>{`
+                @media (max-width: 1024px) {
+                    .auth-container { flex-direction: column !important; }
+                    .auth-left { display: none !important; }
+                    .auth-right { 
+                        width: 100% !important; 
+                        padding: 3rem 1.5rem !important; 
+                        border-left: none !important;
+                    }
+                }
+            `}</style>
             {/* LEFT PANEL: Branding */}
-            <div style={{ 
+            <div className="auth-left" style={{ 
                 flex: 1, 
                 display: 'flex', 
                 flexDirection: 'column', 
@@ -87,7 +98,7 @@ export default function Register() {
             </div>
 
             {/* RIGHT PANEL: form */}
-            <div style={{ 
+            <div className="auth-right" style={{ 
                 width: '560px', 
                 backgroundColor: 'var(--bg-card)', 
                 borderLeft: '1px solid var(--glass-border)',
@@ -95,7 +106,8 @@ export default function Register() {
                 flexDirection: 'column', 
                 justifyContent: 'center', 
                 padding: '5rem',
-                position: 'relative'
+                position: 'relative',
+                transition: 'all 0.3s ease'
             }}>
                 <div className="glow-bg" style={{ top: '10%', right: '10%', backgroundColor: 'var(--primary)', opacity: 0.05 }}></div>
 

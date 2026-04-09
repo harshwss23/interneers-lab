@@ -56,19 +56,27 @@ const Analytics: React.FC = () => {
     const fulfillmentRate = totalOrders > 0 ? Math.round((approvedOrders / totalOrders) * 100) : 0;
 
     return (
-        <div style={{ padding: "2rem", maxWidth: "1400px", margin: "0 auto" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "2rem" }}>
+        <div className="page-container">
+            <style>{`
+                @media (max-width: 768px) {
+                    .dashboard-header { flex-direction: column !important; align-items: flex-start !important; gap: 1.5rem !important; }
+                    .dashboard-title { fontSize: 1.75rem !important; }
+                    .chart-grid { grid-template-columns: 1fr !important; }
+                }
+            `}</style>
+            
+            <div className="dashboard-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "2rem" }}>
                 <div>
-                    <h1 style={{ fontSize: "2.5rem", fontWeight: 950, color: "var(--text-main)", marginBottom: "0.5rem" }}>Analytics Dashboard</h1>
+                    <h1 className="dashboard-title" style={{ fontSize: "2.5rem", fontWeight: 950, color: "var(--text-main)", marginBottom: "0.5rem" }}>Analytics Dashboard</h1>
                     <p style={{ color: "var(--text-muted)" }}>Operational insights and performance metrics.</p>
                 </div>
                 {userRole === 'ADMIN' && (
-                    <div style={{ display: "flex", alignItems: "center", gap: "1rem", backgroundColor: "white", padding: "0.5rem 1rem", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "1rem", backgroundColor: "white", padding: "0.5rem 1rem", borderRadius: "12px", border: "1px solid #e2e8f0", width: "fit-content" }}>
                         <Filter size={18} color="var(--primary)" />
                         <select 
                             value={selectedWarehouse} 
                             onChange={(e) => setSelectedWarehouse(e.target.value)}
-                            style={{ border: "none", outline: "none", fontWeight: 700, fontSize: "0.9rem", cursor: "pointer" }}
+                            style={{ border: "none", outline: "none", fontWeight: 700, fontSize: "0.9rem", cursor: "pointer", backgroundColor: "transparent" }}
                         >
                             <option value="">All Warehouses (Global)</option>
                             {Array.isArray(warehouses) && warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
@@ -78,14 +86,14 @@ const Analytics: React.FC = () => {
             </div>
 
             {/* Summary Cards */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1.5rem", marginBottom: "2rem" }}>
+            <div className="responsive-grid" style={{ marginBottom: "2.5rem" }}>
                 <StatCard icon={<TrendingUp color="#4f46e5" />} title="Inventory Value" value={`$${totalValue.toLocaleString()}`} subtitle="Total asset value on shelves" />
                 <StatCard icon={<Package color="#10b981" />} title="Total Orders" value={totalOrders} subtitle="Across all statuses" />
                 <StatCard icon={<AlertTriangle color="#ef4444" />} title="Low Stock Items" value={data?.low_stock?.length || 0} subtitle="Below safety threshold (10)" />
                 <StatCard icon={<CheckCircle2 color="#8b5cf6" />} title="Fulfillment Rate" value={`${fulfillmentRate}%`} subtitle="Approved vs Total" />
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(500px, 1fr))", gap: "2rem" }}>
+            <div className="chart-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))", gap: "2rem" }}>
                 {/* ABC Analysis - Profitability */}
                 <ChartContainer title="Inventory Value by Category (ABC Analysis)" subtitle="Where the money is tied up">
                     <ResponsiveContainer width="100%" height={300}>
@@ -104,7 +112,7 @@ const Analytics: React.FC = () => {
                                 ))}
                             </Pie>
                             <Tooltip />
-                            <Legend />
+                            <Legend verticalAlign="bottom" height={36}/>
                         </PieChart>
                     </ResponsiveContainer>
                 </ChartContainer>
@@ -120,8 +128,8 @@ const Analytics: React.FC = () => {
                                 </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                            <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
-                            <YAxis fontSize={12} tickLine={false} axisLine={false} />
+                            <XAxis dataKey="name" fontSize={10} tickLine={false} axisLine={false} />
+                            <YAxis fontSize={10} tickLine={false} axisLine={false} />
                             <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
                             <Area type="monotone" dataKey="value" stroke="#4f46e5" strokeWidth={3} fillOpacity={1} fill="url(#colorVel)" />
                         </AreaChart>
@@ -133,8 +141,8 @@ const Analytics: React.FC = () => {
                     <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={data?.low_stock} layout="vertical">
                             <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#e2e8f0" />
-                            <XAxis type="number" fontSize={12} tickLine={false} axisLine={false} />
-                            <YAxis dataKey="name" type="category" fontSize={10} width={100} tickLine={false} axisLine={false} />
+                            <XAxis type="number" fontSize={10} tickLine={false} axisLine={false} />
+                            <YAxis dataKey="name" type="category" fontSize={9} width={80} tickLine={false} axisLine={false} />
                             <Tooltip cursor={{fill: '#f8fafc'}} />
                             <Bar dataKey="value" fill="#ef4444" radius={[0, 4, 4, 0]} barSize={20} />
                         </BarChart>
@@ -146,10 +154,10 @@ const Analytics: React.FC = () => {
                     <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={data?.order_status}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                            <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
-                            <YAxis fontSize={12} tickLine={false} axisLine={false} />
+                            <XAxis dataKey="name" fontSize={10} tickLine={false} axisLine={false} />
+                            <YAxis fontSize={10} tickLine={false} axisLine={false} />
                             <Tooltip />
-                            <Bar dataKey="value" fill="#4f46e5" radius={[4, 4, 0, 0]} barSize={40}>
+                            <Bar dataKey="value" fill="#4f46e5" radius={[4, 4, 0, 0]} barSize={30}>
                                 {Array.isArray(data?.order_status) && data.order_status.map((entry: any, index: number) => (
                                     <Cell key={`cell-${index}`} fill={entry.name === 'APPROVED' ? '#10b981' : entry.name === 'PENDING' ? '#f59e0b' : '#ef4444'} />
                                 ))}
@@ -163,10 +171,10 @@ const Analytics: React.FC = () => {
                     <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={data?.inventory_value}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                            <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
-                            <YAxis fontSize={12} tickLine={false} axisLine={false} />
+                            <XAxis dataKey="name" fontSize={10} tickLine={false} axisLine={false} />
+                            <YAxis fontSize={10} tickLine={false} axisLine={false} />
                             <Tooltip />
-                            <Bar dataKey="count" fill="#8b5cf6" radius={[4, 4, 0, 0]} barSize={40} />
+                            <Bar dataKey="count" fill="#8b5cf6" radius={[4, 4, 0, 0]} barSize={30} />
                         </BarChart>
                     </ResponsiveContainer>
                 </ChartContainer>
@@ -178,10 +186,10 @@ const Analytics: React.FC = () => {
                             <ResponsiveContainer width="100%" height={300}>
                                 <BarChart data={data?.orders_per_warehouse}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                                    <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
-                                    <YAxis fontSize={12} tickLine={false} axisLine={false} />
+                                    <XAxis dataKey="name" fontSize={10} tickLine={false} axisLine={false} />
+                                    <YAxis fontSize={10} tickLine={false} axisLine={false} />
                                     <Tooltip />
-                                    <Bar dataKey="value" fill="#ec4899" radius={[4, 4, 0, 0]} barSize={40} />
+                                    <Bar dataKey="value" fill="#ec4899" radius={[4, 4, 0, 0]} barSize={30} />
                                 </BarChart>
                             </ResponsiveContainer>
                         </ChartContainer>
@@ -195,7 +203,7 @@ const Analytics: React.FC = () => {
                                         outerRadius={100}
                                         paddingAngle={5}
                                         dataKey="value"
-                                        label={({ name, value }) => `${name}: $${value.toLocaleString()}`}
+                                        label={({ name }) => name}
                                         minAngle={15}
                                     >
                                         {Array.isArray(data?.warehouse_value) && data.warehouse_value.map((entry: any, index: number) => (
@@ -203,7 +211,7 @@ const Analytics: React.FC = () => {
                                         ))}
                                     </Pie>
                                     <Tooltip />
-                                    <Legend />
+                                    <Legend verticalAlign="bottom" height={36}/>
                                 </PieChart>
                             </ResponsiveContainer>
                         </ChartContainer>
