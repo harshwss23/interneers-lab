@@ -49,12 +49,15 @@ export default function Login() {
         }}>
             <style>{`
                 @media (max-width: 1024px) {
-                    .auth-container { flex-direction: column !important; }
-                    .auth-left { display: none !important; }
+                    .auth-container { flex-direction: column !important; height: auto !important; }
+                    .auth-left { padding: 4rem 1.5rem !important; flex: none !important; }
+                    .auth-left h1 { font-size: 3rem !important; }
+                    .auth-left p { margin-bottom: 2rem !important; }
                     .auth-right { 
                         width: 100% !important; 
-                        padding: 3rem 1.5rem !important; 
+                        padding: 4rem 1.5rem !important; 
                         border-left: none !important;
+                        border-top: 1px solid var(--glass-border) !important;
                     }
                 }
             `}</style>
@@ -97,6 +100,7 @@ export default function Login() {
             {/* RIGHT PANEL: Login Form */}
             <div className="auth-right" style={{ 
                 width: '560px', 
+                maxWidth: '100%',
                 backgroundColor: 'var(--bg-card)', 
                 borderLeft: '1px solid var(--glass-border)',
                 display: 'flex', 

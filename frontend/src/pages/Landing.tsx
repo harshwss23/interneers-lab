@@ -7,19 +7,40 @@ export default function Landing() {
   return (
     <div className="landing-container" style={{ 
         width: '100%', 
-        height: '100vh', 
+        minHeight: '100vh', 
         display: 'flex', 
         flexDirection: 'row',
         backgroundColor: 'var(--bg-dark)',
-        overflow: 'hidden',
+        overflowX: 'hidden',
         position: 'relative'
     }}>
+      <style>{`
+        @media (max-width: 1024px) {
+            .landing-container { flex-direction: column !important; overflow-y: auto !important; height: auto !important; }
+            .landing-left { padding: 3rem 1.5rem !important; flex: none !important; }
+            .landing-right { 
+                width: 100% !important; 
+                padding: 4rem 1.5rem !important; 
+                border-left: none !important;
+                border-top: 1px solid var(--glass-border) !important;
+            }
+            .hero-title { fontSize: 3.5rem !important; }
+            .stats-ticker { 
+                flex-direction: column !important; 
+                width: 100% !important; 
+                gap: 1.5rem !important;
+                padding: 1.5rem !important;
+            }
+            .stats-divider { display: none !important; }
+        }
+      `}</style>
+      
       {/* Background Decor */}
       <div className="glow-bg" style={{ top: '10%', left: '10%', backgroundColor: 'var(--primary)', opacity: 0.05 }}></div>
       <div className="glow-bg" style={{ bottom: '10%', right: '10%', backgroundColor: 'var(--accent)', opacity: 0.05 }}></div>
 
       {/* LEFT PANEL */}
-      <div style={{ 
+      <div className="landing-left" style={{ 
           flex: 1, 
           display: 'flex', 
           flexDirection: 'column', 
@@ -41,7 +62,7 @@ export default function Landing() {
           </span>
         </div>
 
-        <h1 style={{ 
+        <h1 className="hero-title" style={{ 
             fontSize: '6rem', 
             fontWeight: 950, 
             letterSpacing: '-0.04rem', 
@@ -63,7 +84,7 @@ export default function Landing() {
         </p>
 
         {/* Stats Ticker */}
-        <div style={{ 
+        <div className="stats-ticker" style={{ 
             display: 'flex', 
             gap: '3rem', 
             padding: '2rem', 
@@ -90,7 +111,7 @@ export default function Landing() {
               <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Active Users</div>
             </div>
           </div>
-          <div style={{ width: '1px', backgroundColor: 'var(--glass-border)' }}></div>
+          <div className="stats-divider" style={{ width: '1px', backgroundColor: 'var(--glass-border)' }}></div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
             <div style={{ 
                 width: '56px', 
@@ -112,7 +133,7 @@ export default function Landing() {
       </div>
 
       {/* RIGHT PANEL */}
-      <div style={{ 
+      <div className="landing-right" style={{ 
           width: '500px', 
           backgroundColor: 'var(--bg-card)', 
           borderLeft: '1px solid var(--glass-border)',
