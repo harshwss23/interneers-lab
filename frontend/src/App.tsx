@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Routes, Route, Link, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { useAuth, AuthProvider } from "./context/AuthContext";
-import { Menu, X, LogOut, User as UserIcon, LayoutDashboard, Database, BarChart3, FileText, ShoppingCart, Search, Package as PackageIcon } from "lucide-react";
+import { Menu, X, LogOut, User as UserIcon, LayoutDashboard, Database, BarChart3, FileText, ShoppingCart, Search, Package as PackageIcon, LayoutGrid } from "lucide-react";
 import Home from "./pages/Home";
 import Landing from "./pages/Landing";
 import ProductPage from "./pages/ProductPage";
@@ -19,6 +19,7 @@ import Reports from "./pages/Reports";
 import AdminWarehouses from "./pages/AdminWarehouses";
 import WarehouseDetail from "./pages/WarehouseDetail";
 import AdminDashboard from "./pages/AdminDashboard";
+import Categories from "./pages/Categories";
 
 const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
@@ -62,6 +63,7 @@ const Navbar = () => {
     return (
       <>
         <Link to="/explore" className="nav-link"><Search size={18} /> Explore</Link>
+        <Link to="/categories" className="nav-link"><LayoutGrid size={18} /> Categories</Link>
         <Link to="/cart" className="nav-link"><ShoppingCart size={18} /> Cart</Link>
         <Link to="/my-orders" className="nav-link"><FileText size={18} /> My Orders</Link>
       </>
@@ -214,6 +216,7 @@ function AppContent() {
         <Route path="/category/:category" element={<ProtectedRoute><CategoryPage /></ProtectedRoute>} />
         
         <Route path="/explore" element={<ProtectedRoute allowedRoles={['USER']}><Explore /></ProtectedRoute>} />
+        <Route path="/categories" element={<ProtectedRoute allowedRoles={['USER']}><Categories /></ProtectedRoute>} />
         <Route path="/cart" element={<ProtectedRoute allowedRoles={['USER']}><Cart /></ProtectedRoute>} />
         <Route path="/my-orders" element={<ProtectedRoute allowedRoles={['USER']}><MyOrders /></ProtectedRoute>} />
 

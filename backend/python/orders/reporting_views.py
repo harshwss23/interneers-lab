@@ -34,53 +34,81 @@ class ReportingView(APIView):
         if report_type == 'categories':
             return self.get_categories_report(my_products, request)
         elif report_type == 'price-segments':
-            return self.get_price_segments_report(my_products)
+            return self.get_price_segments_report(my_products, request)
         elif report_type == 'at-risk':
-            return self.get_at_risk_report(my_products)
+            return self.get_at_risk_report(my_products, request)
         
         return Response({"detail": "Invalid report type"}, status=status.HTTP_400_BAD_REQUEST)
 
     def get_categories_report(self, products, request):
         min_count = int(request.query_params.get('min_count', 0))
         max_count = int(request.query_params.get('max_count', 999999))
+        exclude = request.query_params.get('exclude', 'false').lower() == 'true'
         
-        cat_counts = Counter([p.category.title() if p.category else "Unknown" for p in products])
+        # Mapping for title -> count
+        cat_counts = Counter([p.category if p.category else "Unknown" for p in products])
+        
+        # Pre-fetch all categories for ID mapping
+        all_cats = {c.title: str(c.id) for c in ProductCategoryDocument.objects.all()}
         
         report = []
-        for cat_name, count in cat_counts.items():
-            if min_count <= count <= max_count:
+        for title, count in cat_counts.items():
+            in_range = min_count <= count <= max_count
+            should_include = not in_range if exclude else in_range
+            
+            if should_include:
                 report.append({
-                    "category": cat_name,
+                    "category": title,
+                    "category_id": all_cats.get(title),
                     "product_count": count
                 })
         return Response(report)
 
-    def get_price_segments_report(self, products):
-        segments = {
-            "Budget ($0-50)": 0,
-            "Mid-Range ($51-200)": 0,
-            "Premium ($201-1000)": 0,
-            "Luxury ($1000+)": 0
-        }
+    def get_price_segments_report(self, products, request):
+        # Pre-fetch all categories for ID mapping
+        all_cats = {c.title: str(c.id) for c in ProductCategoryDocument.objects.all()}
+        category_map = {} # title -> segments
+        
         for p in products:
+            title = p.category if p.category else "Unknown"
+            if title not in category_map:
+                category_map[title] = {
+                    "Budget ($0-50)": 0,
+                    "Mid-Range ($51-200)": 0,
+                    "Premium ($201-1000)": 0,
+                    "Luxury ($1000+)": 0
+                }
+            
             price = float(p.price or 0)
+            segments = category_map[title]
             if price <= 50: segments["Budget ($0-50)"] += 1
             elif price <= 200: segments["Mid-Range ($51-200)"] += 1
             elif price <= 1000: segments["Premium ($201-1000)"] += 1
             else: segments["Luxury ($1000+)"] += 1
         
-        report = [{"segment": k, "count": v} for k, v in segments.items()]
+        report = []
+        for title, segments in category_map.items():
+            report.append({
+                "category": title,
+                "category_id": all_cats.get(title),
+                "segments": [{"segment": k, "count": v} for k, v in segments.items()],
+                "total": sum(segments.values())
+            })
         return Response(report)
 
-    def get_at_risk_report(self, products):
-        threshold = 10
+    def get_at_risk_report(self, products, request):
+        threshold = int(request.query_params.get('threshold', 10))
+        
+        # Pre-fetch all categories for ID mapping
+        all_cats = {c.title: str(c.id) for c in ProductCategoryDocument.objects.all()}
+        
         # Products running low
         low_stock_products = [p for p in products if (p.quantity or 0) < threshold]
         
         cat_map = {} # cat_name -> [total, low]
         
         for p in products:
-            cat_name = p.category.title() if p.category else "Unknown"
+            cat_name = p.category if p.category else "Unknown"
             if cat_name not in cat_map: cat_map[cat_name] = [0, 0]
             cat_map[cat_name][0] += 1
             if (p.quantity or 0) < threshold:
@@ -92,13 +120,14 @@ class ReportingView(APIView):
             if total > 0 and (low / total) > 0.1:
                 at_risk_categories.append({
                     "category": cat_name,
+                    "category_id": all_cats.get(cat_name),
                     "low_percent": round((low / total * 100), 1) if total > 0 else 0,
                     "low_count": low,
                     "total_count": total
                 })
         
         return Response({
-            "low_stock_products": [{"id": p.id, "name": p.name, "quantity": p.quantity} for p in low_stock_products[:15]],
+            "low_stock_products": [{"id": p.id, "name": p.name, "quantity": p.quantity} for p in low_stock_products],
             "at_risk_categories": at_risk_categories
         })
 

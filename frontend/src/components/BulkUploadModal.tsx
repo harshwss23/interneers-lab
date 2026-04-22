@@ -153,12 +153,31 @@ const BulkUploadModal: React.FC<BulkUploadModalProps> = ({ isOpen, onClose, onSu
                         
                         {result.errors && result.errors.length > 0 && (
                             <div style={{ marginTop: '1.5rem' }}>
-                                <h4 style={{ color: '#dc2626', marginBottom: '0.5rem' }}>Errors ({result.errors.length}):</h4>
-                                <ul style={{ fontSize: '0.85rem', color: '#64748b', paddingLeft: '1.2rem' }}>
-                                    {result.errors.slice(0, 5).map((err: string, i: number) => (
-                                        <li key={i} style={{ marginBottom: '0.25rem' }}>{err}</li>
+                                <ul style={{ fontSize: '0.85rem', color: '#64748b', paddingLeft: '0', listStyleType: 'none' }}>
+                                    {result.errors.slice(0, 5).map((err: any, i: number) => (
+                                        <li key={i} style={{ 
+                                            marginBottom: '0.75rem', 
+                                            padding: '0.75rem', 
+                                            backgroundColor: '#fff1f2', 
+                                            borderRadius: '8px',
+                                            border: '1px solid #fecdd3'
+                                        }}>
+                                            <div style={{ fontWeight: 700, color: '#be123c', marginBottom: '0.25rem' }}>
+                                                Row {err.row_index + 1}:
+                                            </div>
+                                            <div style={{ color: '#4b5563' }}>{err.error}</div>
+                                            {err.data?.name && (
+                                                <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.25rem' }}>
+                                                    Product: {err.data.name}
+                                                </div>
+                                            )}
+                                        </li>
                                     ))}
-                                    {result.errors.length > 5 && <li>...and {result.errors.length - 5} more</li>}
+                                    {result.errors.length > 5 && (
+                                        <li style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.75rem', marginTop: '1rem' }}>
+                                            ...and {result.errors.length - 5} more errors
+                                        </li>
+                                    )}
                                 </ul>
                             </div>
                         )}

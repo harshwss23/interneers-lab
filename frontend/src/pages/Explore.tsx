@@ -107,53 +107,70 @@ export default function Explore() {
                 </div>
             )}
 
-            {/* Premium Filter Bar */}
-            <div style={{ 
-                backgroundColor: "white", 
-                padding: "1.5rem", 
-                borderRadius: "20px", 
-                boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.05)",
-                marginBottom: "3rem",
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr 1fr",
-                gap: "1.5rem",
-                border: "1px solid #f1f5f9"
-            }}>
-                <div style={{ position: 'relative' }}>
-                    <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-                    <input 
-                        type="text" 
-                        placeholder="Search products..." 
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        style={{ width: "100%", padding: "0.85rem 1rem 0.85rem 3rem", borderRadius: "12px", border: "1px solid #e2e8f0", fontSize: "0.95rem" }}
-                    />
-                </div>
-                <div>
-                    <select 
-                        value={selectedCategory}
-                        onChange={(e) => setSelectedCategory(e.target.value)}
-                        style={{ width: "100%", padding: "0.85rem 1rem", borderRadius: "12px", border: "1px solid #e2e8f0", fontSize: "0.95rem", appearance: "none", backgroundColor: "white" }}
+            {/* Category Buttons */}
+            <div style={{ marginBottom: "2rem" }}>
+                <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "#1e293b", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <Filter size={16} /> Browse by Category
+                </h3>
+                <div style={{ display: "flex", gap: "0.75rem", overflowX: "auto", paddingBottom: "0.5rem", scrollbarWidth: "none" }}>
+                    <button 
+                        onClick={() => setSelectedCategory("")}
+                        style={{ 
+                            padding: "0.6rem 1.25rem", 
+                            borderRadius: "100px", 
+                            border: "1px solid", 
+                            borderColor: selectedCategory === "" ? "var(--primary)" : "#e2e8f0",
+                            backgroundColor: selectedCategory === "" ? "var(--primary)" : "white",
+                            color: selectedCategory === "" ? "white" : "#64748b",
+                            fontWeight: 700,
+                            fontSize: "0.85rem",
+                            cursor: "pointer",
+                            transition: "all 0.2s ease",
+                            whiteSpace: "nowrap"
+                        }}
                     >
-                        <option value="">All Categories</option>
-                        {categories.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
-                    </select>
-                </div>
-                <div style={{ display: "flex", gap: "0.75rem" }}>
-                    <input 
-                        type="number" 
-                        placeholder="Min Price" 
-                        value={minPrice}
-                        onChange={(e) => setMinPrice(e.target.value)}
-                        style={{ width: "100%", padding: "0.85rem 1rem", borderRadius: "12px", border: "1px solid #e2e8f0", fontSize: "0.95rem" }}
-                    />
-                    <input 
-                        type="number" 
-                        placeholder="Max Price" 
-                        value={maxPrice}
-                        onChange={(e) => setMaxPrice(e.target.value)}
-                        style={{ width: "100%", padding: "0.85rem 1rem", borderRadius: "12px", border: "1px solid #e2e8f0", fontSize: "0.95rem" }}
-                    />
+                        All Products
+                    </button>
+                    {categories.map(c => (
+                        <button 
+                            key={c.id}
+                            onClick={() => setSelectedCategory(c.id)}
+                            style={{ 
+                                padding: "0.6rem 1.25rem", 
+                                borderRadius: "100px", 
+                                border: "1px solid", 
+                                borderColor: selectedCategory === c.id ? "var(--primary)" : "#e2e8f0",
+                                backgroundColor: selectedCategory === c.id ? "var(--primary)" : "white",
+                                color: selectedCategory === c.id ? "white" : "#64748b",
+                                fontWeight: 700,
+                                fontSize: "0.85rem",
+                                cursor: "pointer",
+                                transition: "all 0.2s ease",
+                                whiteSpace: "nowrap"
+                            }}
+                        >
+                            {c.title}
+                        </button>
+                    ))}
+                    <Link 
+                        to="/categories" 
+                        style={{ 
+                            padding: "0.6rem 1.25rem", 
+                            borderRadius: "100px", 
+                            border: "1px solid #e2e8f0",
+                            backgroundColor: "#f8fafc",
+                            color: "var(--primary)",
+                            fontWeight: 700,
+                            fontSize: "0.85rem",
+                            textDecoration: "none",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.4rem",
+                            whiteSpace: "nowrap"
+                        }}
+                    >
+                        View All <ArrowRight size={14} />
+                    </Link>
                 </div>
             </div>
 
