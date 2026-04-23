@@ -4,6 +4,8 @@ import { getProductById, updateProduct } from "../services/api";
 import { Product } from "../types/product";
 import { useAuth } from "../context/AuthContext";
 import ErrorAlert from "../components/ErrorAlert";
+import PlaceOrderModal from "../components/PlaceOrderModal";
+import { ShoppingBag } from "lucide-react";
 
 export default function ProductPage() {
     const { id } = useParams();
@@ -12,6 +14,7 @@ export default function ProductPage() {
     const [error, setError] = useState("");
     const [saving, setSaving] = useState(false);
     const { user } = useAuth();
+    const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
     const canEdit = user?.role === 'ADMIN' || user?.role === 'WAREHOUSE_MANAGER';
 
     useEffect(() => {
@@ -253,8 +256,39 @@ export default function ProductPage() {
                             {saving ? "Saving Changes..." : "Save Product Details"}
                         </button>
                     )}
+
+                    {!isAuthorized && (
+                        <button 
+                            onClick={() => setIsOrderModalOpen(true)}
+                            style={{
+                                backgroundColor: "#10b981",
+                                color: "white",
+                                border: "none",
+                                padding: "1rem",
+                                borderRadius: "10px",
+                                fontWeight: 600,
+                                fontSize: "1rem",
+                                cursor: "pointer",
+                                transition: "background-color 0.2s",
+                                marginTop: "1rem",
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                gap: "0.5rem"
+                            }}
+                        >
+                            <ShoppingBag size={20} /> Place Order
+                        </button>
+                    )}
                 </div>
             </div>
+
+            <PlaceOrderModal 
+                isOpen={isOrderModalOpen}
+                onClose={() => setIsOrderModalOpen(false)}
+                onSuccess={() => setSuccess("Order placed successfully! Track it in the Orders page.")}
+                product={{ id: id || "0", name: product.name, price: product.price }}
+            />
         </div>
     );
 }

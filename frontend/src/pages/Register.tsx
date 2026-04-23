@@ -1,122 +1,220 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { UserPlus, Mail, Lock, User, Loader2, ArrowRight, Database, Layout } from 'lucide-react';
 
 export default function Register() {
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [role, setRole] = useState('USER');
+    const [formData, setFormData] = useState({ username: '', email: '', password: '', role: 'USER' });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login } = useAuth();
     const navigate = useNavigate();
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError('');
         try {
-            const res = await fetch('http://localhost:8000/api/accounts/register/', {
+            const res = await fetch('/api/accounts/register/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, email, password, role }),
+                body: JSON.stringify(formData),
             });
             const data = await res.json();
             if (res.ok) {
-                login(data.token, data.user);
-                navigate('/');
+                navigate('/verify-otp', { state: { email: formData.email } });
             } else {
                 setError(data.error || 'Registration failed');
             }
         } catch (err) {
-            setError('Connection failed');
+            setError('Connection failed. Please try again.');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div style={{ 
-            height: '100vh', 
+        <div className="auth-container" style={{ 
+            width: '100%', 
+            minHeight: '100vh', 
             display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            backgroundColor: '#f8fafc' 
+            flexDirection: 'row',
+            backgroundColor: 'var(--bg-dark)',
+            overflowX: 'hidden'
         }}>
-            <div style={{ 
-                width: '100%', 
-                maxWidth: '450px', 
-                padding: '2.5rem', 
-                backgroundColor: 'white', 
-                borderRadius: '16px', 
-                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' 
+            <style>{`
+                @media (max-width: 1024px) {
+                    .auth-container { flex-direction: column !important; height: auto !important; }
+                    .auth-left { padding: 4rem 1.5rem !important; flex: none !important; }
+                    .auth-left h1 { font-size: 3rem !important; }
+                    .auth-left p { margin-bottom: 2rem !important; }
+                    .auth-right { 
+                        width: 100% !important; 
+                        padding: 4rem 1.5rem !important; 
+                        border-left: none !important;
+                        border-top: 1px solid var(--glass-border) !important;
+                    }
+                }
+            `}</style>
+            {/* LEFT PANEL: Branding */}
+            <div className="auth-left" style={{ 
+                flex: 1, 
+                display: 'flex', 
+                flexDirection: 'column', 
+                justifyContent: 'center', 
+                padding: '5rem',
+                position: 'relative'
             }}>
-                <h2 style={{ textAlign: 'center', color: '#1e293b', marginBottom: '2rem' }}>Create Account</h2>
-                {error && <p style={{ color: '#ef4444', backgroundColor: '#fef2f2', padding: '0.75rem', borderRadius: '8px', fontSize: '0.875rem', marginBottom: '1.5rem' }}>{error}</p>}
+                <div className="glow-bg" style={{ bottom: '10%', left: '10%', backgroundColor: 'var(--accent)', opacity: 0.05 }}></div>
                 
-                <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1.25rem' }}>
-                    <div>
-                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Username</label>
-                        <input 
-                            type="text" 
-                            required 
-                            value={username} 
-                            onChange={(e) => setUsername(e.target.value)}
-                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1' }}
-                        />
-                    </div>
-                    <div>
-                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Email Address</label>
-                        <input 
-                            type="email" 
-                            required 
-                            value={email} 
-                            onChange={(e) => setEmail(e.target.value)}
-                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1' }}
-                        />
-                    </div>
-                    <div>
-                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Password</label>
-                        <input 
-                            type="password" 
-                            required 
-                            value={password} 
-                            onChange={(e) => setPassword(e.target.value)}
-                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1' }}
-                        />
-                    </div>
-                    <div>
-                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, color: '#475569', marginBottom: '0.5rem' }}>Identify As</label>
-                        <select 
-                            value={role} 
-                            onChange={(e) => setRole(e.target.value)}
-                            style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1' }}
-                        >
-                            <option value="USER">User</option>
-                            <option value="WAREHOUSE_MANAGER">Warehouse Manager</option>
-                            <option value="ADMIN">Administrator</option>
-                        </select>
-                    </div>
-                    <button 
-                        disabled={loading}
-                        style={{ 
-                            backgroundColor: '#4f46e5', 
-                            color: 'white', 
-                            padding: '0.75rem', 
-                            borderRadius: '8px', 
-                            fontWeight: 600, 
-                            border: 'none', 
-                            cursor: 'pointer',
-                            marginTop: '1rem'
-                        }}
-                    >
-                        {loading ? 'Creating Account...' : 'Register'}
-                    </button>
-                </form>
-                <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.875rem', color: '#64748b' }}>
-                    Already have an account? <Link to="/login" style={{ color: '#4f46e5', fontWeight: 600, textDecoration: 'none' }}>Sign in</Link>
+                <div style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <div style={{ height: '2px', width: '48px', backgroundColor: 'var(--primary)' }}></div>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.2rem', textTransform: 'uppercase', color: 'var(--primary)' }}>
+                        Join the Network
+                    </span>
+                </div>
+
+                <h1 style={{ fontSize: '5rem', fontWeight: 950, letterSpacing: '-0.04rem', lineHeight: 1.1, color: 'var(--text-main)', marginBottom: '2rem' }}>
+                    Create Your<br /><span style={{ color: 'transparent', WebkitTextStroke: '1px var(--primary)' }}>Account</span>
+                </h1>
+
+                <p style={{ fontSize: '1.125rem', maxWidth: '400px', lineHeight: 1.6, color: 'var(--text-muted)', marginBottom: '4rem' }}>
+                    Join 1,200+ professionals managing their inventory with precision and security.
                 </p>
+
+                <div style={{ display: 'grid', gap: '1.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(37, 99, 235, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Database size={20} style={{ color: 'var(--primary)' }} />
+                        </div>
+                        <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>Real-time Data Sync</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(124, 58, 237, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Layout size={20} style={{ color: 'var(--accent)' }} />
+                        </div>
+                        <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>Intuitive Dashboard</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* RIGHT PANEL: form */}
+            <div className="auth-right" style={{ 
+                width: '560px', 
+                maxWidth: '100%',
+                backgroundColor: 'var(--bg-card)', 
+                borderLeft: '1px solid var(--glass-border)',
+                display: 'flex', 
+                flexDirection: 'column', 
+                justifyContent: 'center', 
+                padding: '5rem',
+                position: 'relative',
+                transition: 'all 0.3s ease'
+            }}>
+                <div className="glow-bg" style={{ top: '10%', right: '10%', backgroundColor: 'var(--primary)', opacity: 0.05 }}></div>
+
+                <div style={{ width: '100%', maxWidth: '360px', margin: '0 auto' }}>
+                    <div style={{ marginBottom: '3rem' }}>
+                        <div style={{ 
+                            width: '64px', 
+                            height: '64px', 
+                            borderRadius: '20px', 
+                            background: 'var(--text-main)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginBottom: '1.5rem'
+                        }}>
+                            <UserPlus size={32} color="white" />
+                        </div>
+                        <h2 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '0.5rem' }}>Register</h2>
+                        <p style={{ color: 'var(--text-muted)' }}>Get started with your account</p>
+                    </div>
+
+                    {error && (
+                        <div style={{ 
+                            color: '#ef4444', 
+                            backgroundColor: 'rgba(239, 68, 68, 0.05)', 
+                            padding: '1rem', 
+                            borderRadius: '12px', 
+                            fontSize: '0.875rem', 
+                            marginBottom: '2rem',
+                            border: '1px solid rgba(239, 68, 68, 0.1)'
+                        }}>
+                            {error}
+                        </div>
+                    )}
+
+                    <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1.25rem' }}>
+                        <div style={{ position: 'relative' }}>
+                            <User size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                            <input 
+                                type="text" 
+                                name="username"
+                                required 
+                                className="glass-input"
+                                placeholder="Username"
+                                value={formData.username}
+                                onChange={handleChange}
+                                style={{ width: '100%', paddingLeft: '3rem' }}
+                            />
+                        </div>
+                        <div style={{ position: 'relative' }}>
+                            <Mail size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                            <input 
+                                type="email" 
+                                name="email"
+                                required 
+                                className="glass-input"
+                                placeholder="Email Address"
+                                value={formData.email}
+                                onChange={handleChange}
+                                style={{ width: '100%', paddingLeft: '3rem' }}
+                            />
+                        </div>
+                        <div style={{ position: 'relative' }}>
+                            <Lock size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                            <input 
+                                type="password" 
+                                name="password"
+                                required 
+                                className="glass-input"
+                                placeholder="Password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                style={{ width: '100%', paddingLeft: '3rem' }}
+                            />
+                        </div>
+
+                        <div style={{ position: 'relative' }}>
+                            <Layout size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                            <select 
+                                name="role"
+                                className="glass-input"
+                                value={formData.role}
+                                onChange={handleChange}
+                                style={{ width: '100%', paddingLeft: '3rem', appearance: 'none', backgroundColor: 'transparent' }}
+                            >
+                                <option value="USER" style={{ color: "black" }}>Register as Customer (User)</option>
+                                <option value="WAREHOUSE_MANAGER" style={{ color: "black" }}>Register as Warehouse Manager</option>
+                            </select>
+                        </div>
+                        
+                        <button 
+                            disabled={loading}
+                            className="btn-primary"
+                            style={{ padding: '1.1rem', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', marginTop: '1rem' }}
+                        >
+                            {loading ? <Loader2 className="animate-spin" /> : <>Create Account <ArrowRight size={20} /></>}
+                        </button>
+                    </form>
+
+                    <p style={{ marginTop: '2.5rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                        Already have an account? <Link to="/login" style={{ color: 'var(--primary)', fontWeight: 700, textDecoration: 'none' }}>Login instead</Link>
+                    </p>
+                </div>
             </div>
         </div>
     );

@@ -17,9 +17,9 @@ class ProductCategoryService:
         self.repo = repo
 
     def create_category(self, req: CategoryCreateRequest) -> CategoryResponse:
-        # Check if both fields are provided
-        if not req.title or not req.description:
-            raise ValidationError("Kindly Provie both Fields")
+        # Check if title is provided (description is optional)
+        if not req.title:
+            raise ValidationError("Category title is required")
 
         # Check if category already exists
         existing = self.repo.get_by_title(req.title)

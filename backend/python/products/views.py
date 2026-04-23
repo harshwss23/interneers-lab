@@ -1,118 +1,154 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-
-from .store import PRODUCTS, new_id
-from .serializers import ProductCreateSerializer, ProductUpdateSerializer
-
-
-def not_found(product_id: str):
-    return Response(
-        {"error": {"code": "NOT_FOUND", "message": f"Product '{product_id}' not found"}},
-        status=status.HTTP_404_NOT_FOUND,
-    )
-
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.parsers import MultiPartParser, FormParser
+from django.db.models import Q
+from .models import Product
+from .serializers import ProductSerializer
+import csv
+import io
 
 class ProductListCreate(APIView):
-    """
-    POST /api/products/   -> create
-    GET  /api/products/   -> list (supports ?page=1&page_size=10)
-    """
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsAuthenticated()]
+        return [AllowAny()]
 
     def post(self, request):
-        s = ProductCreateSerializer(data=request.data)
-        if not s.is_valid():
-            return Response(
-                {"error": {"code": "VALIDATION_ERROR", "details": s.errors}},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        data = s.validated_data
-        pid = new_id()
-        product = {"id": pid, **data}
-        PRODUCTS[pid] = product
-
-        return Response(product, status=status.HTTP_201_CREATED)
+        serializer = ProductSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(created_by=request.user)
+            return Response({"data": serializer.data}, status=status.HTTP_201_CREATED)
+        return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request):
-        items = list(PRODUCTS.values())
+        queryset = Product.objects.all()
+        
+        category = request.query_params.get('category')
+        category_id = request.query_params.get('category_id') # Support frontend's category_id param
+        search = request.query_params.get('search')
+        created_by = request.query_params.get('created_by')
 
-        # Support category filtering (Week 4)
-        category_id = request.query_params.get("category_id")
-        if category_id:
-            items = [i for i in items if i.get("category") == category_id or str(i.get("category_id")) == category_id]
+        if category:
+            queryset = queryset.filter(category=category.lower())
+        elif category_id:
+            # Simple mapping if needed, or just filter by category field
+            queryset = queryset.filter(category=category_id.lower())
+        
+        if search:
+            queryset = queryset.filter(
+                Q(name__icontains=search) | 
+                Q(description__icontains=search) |
+                Q(brand__icontains=search)
+            )
 
-        # basic pagination (advanced)
+        if created_by:
+            queryset = queryset.filter(created_by__username=created_by)
+
+        # Basic pagination
         try:
             page = int(request.query_params.get("page", "1"))
             page_size = int(request.query_params.get("page_size", "10"))
-            if page < 1 or page_size < 1 or page_size > 100:
-                raise ValueError()
         except ValueError:
-            return Response(
-                {"error": {"code": "INVALID_PAGINATION", "message": "Use page>=1 and 1<=page_size<=100"}},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            page, page_size = 1, 10
 
         start = (page - 1) * page_size
         end = start + page_size
+        
+        results = queryset.order_by('-created_at')[start:end]
+        serializer = ProductSerializer(results, many=True)
 
-        return Response(
-            {
-                "page": page,
-                "page_size": page_size,
-                "total": len(items),
-                "results": items[start:end],
-            },
-            status=status.HTTP_200_OK,
-        )
-
+        return Response({
+            "data": serializer.data,
+            "page": page,
+            "page_size": page_size,
+            "total": queryset.count()
+        })
 
 class ProductDetail(APIView):
-    """
-    GET    /api/products/<id>/  -> fetch
-    PUT    /api/products/<id>/  -> replace
-    PATCH  /api/products/<id>/  -> partial update
-    DELETE /api/products/<id>/  -> delete
-    """
+    def get_permissions(self):
+        if self.request.method in ['PATCH', 'PUT', 'DELETE']:
+            return [IsAuthenticated()]
+        return [AllowAny()]
 
-    def get(self, request, product_id: str):
-        p = PRODUCTS.get(product_id)
-        if not p:
-            return not_found(product_id)
-        return Response(p)
+    def get_object(self, pk):
+        try:
+            # Handle both string UUIDs (from old Mongo structure) and integer PKs
+            if isinstance(pk, str) and not pk.isdigit():
+                return None # Or search by a 'uuid' field if we had one
+            return Product.objects.get(pk=pk)
+        except (Product.DoesNotExist, ValueError):
+            return None
 
-    def delete(self, request, product_id: str):
-        if product_id not in PRODUCTS:
-            return not_found(product_id)
-        del PRODUCTS[product_id]
+    def get(self, request, pk):
+        product = self.get_object(pk)
+        if not product:
+            return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
+        serializer = ProductSerializer(product)
+        return Response({"data": serializer.data})
+
+    def patch(self, request, pk):
+        product = self.get_object(pk)
+        if not product:
+            return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        if product.created_by != request.user and request.user.role != "ADMIN":
+            return Response({"error": "Only the owner or an admin can modify this product."}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = ProductSerializer(product, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"data": serializer.data})
+        return Response({"error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        product = self.get_object(pk)
+        if not product:
+            return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        if product.created_by != request.user and request.user.role != "ADMIN":
+            return Response({"error": "Only the owner or an admin can delete this product."}, status=status.HTTP_403_FORBIDDEN)
+
+        product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def put(self, request, product_id: str):
-        # full replace => same validation as create
-        if product_id not in PRODUCTS:
-            return not_found(product_id)
+class BulkUploadProducts(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
 
-        s = ProductCreateSerializer(data=request.data)
-        if not s.is_valid():
-            return Response(
-                {"error": {"code": "VALIDATION_ERROR", "details": s.errors}},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        PRODUCTS[product_id] = {"id": product_id, **s.validated_data}
-        return Response(PRODUCTS[product_id])
-
-    def patch(self, request, product_id: str):
-        if product_id not in PRODUCTS:
-            return not_found(product_id)
-
-        s = ProductUpdateSerializer(data=request.data, partial=True)
-        if not s.is_valid():
-            return Response(
-                {"error": {"code": "VALIDATION_ERROR", "details": s.errors}},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        PRODUCTS[product_id].update(s.validated_data)
-        return Response(PRODUCTS[product_id])
+    def post(self, request):
+        if 'file' not in request.FILES:
+            return Response({"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        file = request.FILES['file']
+        decoded_file = file.read().decode('utf-8')
+        io_string = io.StringIO(decoded_file)
+        reader = csv.DictReader(io_string)
+        
+        created_count = 0
+        errors = []
+        
+        for i, row in enumerate(reader):
+            try:
+                data = {
+                    "name": row.get("name"),
+                    "description": row.get("description", ""),
+                    "brand": row.get("brand", ""),
+                    "category": row.get("category", "other"),
+                    "price": float(row.get("price", 0)),
+                    "quantity": int(row.get("quantity", 0))
+                }
+                serializer = ProductSerializer(data=data)
+                if serializer.is_valid():
+                    serializer.save(created_by=request.user)
+                    created_count += 1
+                else:
+                    errors.append({"row": i, "errors": serializer.errors})
+            except Exception as e:
+                errors.append({"row": i, "error": str(e)})
+        
+        return Response({
+            "message": f"Successfully created {created_count} products",
+            "errors": errors
+        }, status=status.HTTP_201_CREATED if not errors else status.HTTP_207_MULTI_STATUS)

@@ -22,7 +22,7 @@ export default function AdminDashboard() {
 
     const fetchUsers = async () => {
         try {
-            const res = await fetch('http://localhost:8000/api/accounts/users/', {
+            const res = await fetch('/api/accounts/users/', {
                 headers: { 'Authorization': `Token ${token}` }
             });
             const json = await res.json();
@@ -37,7 +37,7 @@ export default function AdminDashboard() {
     const toggleUserStatus = async (userId: number, currentStatus: string) => {
         const newStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
         try {
-            const res = await fetch(`http://localhost:8000/api/accounts/users/${userId}/`, {
+            const res = await fetch(`/api/accounts/users/${userId}/`, {
                 method: 'PATCH',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -55,7 +55,7 @@ export default function AdminDashboard() {
 
     const changeUserRole = async (userId: number, newRole: string) => {
         try {
-            const res = await fetch(`http://localhost:8000/api/accounts/users/${userId}/`, {
+            const res = await fetch(`/api/accounts/users/${userId}/`, {
                 method: 'PATCH',
                 headers: { 
                     'Content-Type': 'application/json',

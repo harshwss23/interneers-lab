@@ -2,10 +2,17 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth import authenticate
+from django.core.mail import send_mail
+from django.conf import settings
+import random
+import string
 from .models import User
 from .permissions import IsAdmin
+
+def generate_otp():
+    return ''.join(random.choices(string.digits, k=6))
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
@@ -15,7 +22,10 @@ class RegisterView(APIView):
         username = data.get('username')
         password = data.get('password')
         email = data.get('email')
-        role = data.get('role', 'WAREHOUSE_MANAGER')
+        role = data.get('role', 'USER')
+
+        if role not in ['USER', 'WAREHOUSE_MANAGER']:
+            role = 'USER'
 
         if not username or not password:
             return Response({'error': 'Username and password are required'}, status=status.HTTP_400_BAD_REQUEST)
@@ -24,13 +34,33 @@ class RegisterView(APIView):
             return Response({'error': 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
 
         user = User.objects.create_user(username=username, password=password, email=email, role=role)
-        token, _ = Token.objects.get_or_create(user=user)
+        
+        # Generate and save OTP
+        otp = generate_otp()
+        user.otp = otp
+        user.status = 'INACTIVE'
+        user.save()
+
+        # Send OTP via SES
+        try:
+            send_mail(
+                'Verify your email',
+                f'Your OTP is: {otp}',
+                settings.DEFAULT_FROM_EMAIL,
+                [email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            # For now, just log the error or return a message. 
+            # In production, you might want to handle this more gracefully.
+            pass
 
         return Response({
-            'token': token.key,
+            'message': 'Registration successful. Please check your email for OTP.',
             'user': {
                 'id': user.id,
                 'username': user.username,
+                'email': user.email,
                 'role': user.role,
                 'status': user.status
             }
@@ -92,3 +122,64 @@ class UserUpdateView(APIView):
             return Response({"data": {"id": user.id, "role": user.role, "status": user.status}})
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+class SendOTPView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            user = User.objects.get(email=email)
+            otp = generate_otp()
+            user.otp = otp
+            user.save()
+
+            send_mail(
+                'Your OTP Verification Code',
+                f'Your OTP is: {otp}',
+                settings.DEFAULT_FROM_EMAIL,
+                [email],
+                fail_silently=False,
+            )
+            return Response({'message': 'OTP sent successfully'})
+        except User.DoesNotExist:
+            return Response({'error': 'User with this email does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class VerifyOTPView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        otp = request.data.get('otp')
+
+        if not email or not otp:
+            return Response({'error': 'Email and OTP are required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(email=email)
+            if user.otp == otp:
+                user.is_verified = True
+                user.status = 'ACTIVE'
+                user.otp = None # Clear OTP after verification
+                user.save()
+                
+                token, _ = Token.objects.get_or_create(user=user)
+                return Response({
+                    'message': 'OTP verified successfully. Account is now active.',
+                    'token': token.key,
+                    'user': {
+                        'id': user.id,
+                        'username': user.username,
+                        'role': user.role,
+                        'status': user.status
+                    }
+                })
+            else:
+                return Response({'error': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
