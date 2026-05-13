@@ -30,7 +30,12 @@ const AdminWarehouses: React.FC = () => {
                     headers: { 'Authorization': `Token ${localStorage.getItem('token')}` }
                 });
                 const data = await res.json();
-                setSummary(data);
+                if (res.ok) {
+                    setSummary(data);
+                } else {
+                    console.error("Error from API:", data);
+                    setSummary([]);
+                }
             } catch (err) {
                 console.error("Failed to fetch warehouse summary", err);
             } finally {

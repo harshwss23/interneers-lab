@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Routes, Route, Link, useNavigate, Navigate, useLocation } from "react-router-dom";
 import { useAuth, AuthProvider } from "./context/AuthContext";
-import { Menu, X, LogOut, User as UserIcon, LayoutDashboard, Database, BarChart3, FileText, ShoppingCart, Search, Package as PackageIcon, LayoutGrid } from "lucide-react";
+import { Menu, X, LogOut, User as UserIcon, LayoutDashboard, Database, BarChart3, FileText, ShoppingCart, Search, Package as PackageIcon, LayoutGrid, MessageCircle } from "lucide-react";
 import Home from "./pages/Home";
 import Landing from "./pages/Landing";
 import ProductPage from "./pages/ProductPage";
@@ -20,6 +20,7 @@ import AdminWarehouses from "./pages/AdminWarehouses";
 import WarehouseDetail from "./pages/WarehouseDetail";
 import AdminDashboard from "./pages/AdminDashboard";
 import Categories from "./pages/Categories";
+import Connections from "./pages/Connections";
 
 const Navbar = () => {
   const { user, logout, isAuthenticated } = useAuth();
@@ -47,6 +48,7 @@ const Navbar = () => {
         <>
           <Link to="/admin/warehouses" className="nav-link"><LayoutDashboard size={18} /> Global Dashboard</Link>
           <Link to="/analytics" className="nav-link"><BarChart3 size={18} /> Global Analytics</Link>
+          <Link to="/connections" className="nav-link"><MessageCircle size={18} /> Connections</Link>
         </>
       );
     }
@@ -57,6 +59,7 @@ const Navbar = () => {
           <Link to="/orders" className="nav-link"><PackageIcon size={18} /> Orders</Link>
           <Link to="/analytics" className="nav-link"><BarChart3 size={18} /> Analytics</Link>
           <Link to="/reports" className="nav-link"><FileText size={18} /> Reports</Link>
+          <Link to="/connections" className="nav-link"><MessageCircle size={18} /> Connections</Link>
         </>
       );
     }
@@ -226,6 +229,7 @@ function AppContent() {
         <Route path="/admin/warehouses" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminWarehouses /></ProtectedRoute>} />
         <Route path="/warehouse/:warehouseId" element={<ProtectedRoute allowedRoles={['ADMIN', 'WAREHOUSE_MANAGER']}><WarehouseDetail /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute allowedRoles={['ADMIN']}><AdminDashboard /></ProtectedRoute>} />
+        <Route path="/connections" element={<ProtectedRoute allowedRoles={['ADMIN', 'WAREHOUSE_MANAGER']}><Connections /></ProtectedRoute>} />
       </Routes>
     </div>
   );

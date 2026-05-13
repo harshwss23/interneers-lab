@@ -183,3 +183,38 @@ class VerifyOTPView(APIView):
                 return Response({'error': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
         except User.DoesNotExist:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+from .chat_models import ChatMessage
+
+class ChatHistoryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        if user.role == 'ADMIN':
+            # Admin can see all messages (or just broadcast and direct ones involving them)
+            messages = ChatMessage.objects.all().order_by('timestamp')
+        elif user.role == 'WAREHOUSE_MANAGER':
+            # Managers can see broadcast messages (receiver_username="") and direct messages to/from them
+            messages = ChatMessage.objects.filter(
+                __raw__={
+                    '$or': [
+                        {'receiver_username': ""},
+                        {'receiver_username': user.username},
+                        {'sender_username': user.username}
+                    ]
+                }
+            ).order_by('timestamp')
+        else:
+            messages = []
+            
+        data = [{
+            'id': str(m.id),
+            'sender': m.sender_username,
+            'sender_role': m.sender_role,
+            'receiver': m.receiver_username or 'all',
+            'content': m.content,
+            'timestamp': m.timestamp.isoformat() if m.timestamp else None
+        } for m in messages]
+        
+        return Response({'data': data})
