@@ -49,6 +49,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "setup key")
 DEBUG = os.getenv("DEBUG", "True").lower() == "true"
 
 ALLOWED_HOSTS = ["*"] if os.getenv("ALLOWED_HOSTS", "*") == "*" else os.getenv("ALLOWED_HOSTS", "").split(",")
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",") if os.getenv("CORS_ALLOWED_ORIGINS") else []
